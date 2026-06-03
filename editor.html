@@ -263,8 +263,9 @@
     }
     .modal-question-num { font-weight: 600; color: var(--accent); font-size: 0.9rem; }
     .modal-question-text {
-      font-size: 0.95rem; white-space: pre-wrap; margin: 0 0 0.75rem; line-height: 1.4;
+      font-size: 0.95rem; white-space: normal; margin: 0 0 0.75rem; line-height: 1.4;
     }
+    .modal-question-text img { max-width: 100%; height: auto; display: block; margin: 0.25rem 0; }
     .modal-options { list-style: none; margin: 0; padding: 0; }
     .modal-options li {
       padding: 0.4rem 0.5rem; margin-bottom: 0.25rem; border-radius: 4px;
@@ -411,6 +412,8 @@
     </div>
   </div>
 
+  <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] } };</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <script src="converter.js"></script>
   <script>
     const THEME_KEY = 'bq-converter-theme';
@@ -576,6 +579,11 @@
       div.textContent = s == null ? '' : String(s);
       return div.innerHTML;
     }
+    function renderRichHtml(s) {
+      if (s == null) return '';
+      return String(s).replace(/\n/g, '<br>');
+    }
+
     function renderModalQuestions(banco) {
       var list = banco.question_list || [];
       modalBody.innerHTML = '';
@@ -586,13 +594,13 @@
         var questionText = (q.question != null ? String(q.question) : '').trim();
         var correctText = (q.correct_answer != null ? String(q.correct_answer) : '').trim();
         var options = [];
-        options.push('<li class="correct">' + escapeHtml(correctText) + ' <span style="font-size:0.8em;color:var(--success)">(Correta)</span></li>');
+        options.push('<li class="correct">' + renderRichHtml(correctText) + ' <span style="font-size:0.8em;color:var(--success)">(Correta)</span></li>');
         (q.wrong_answer_list || []).forEach(function (a) {
-          var t = (a != null && String(a).trim()) ? escapeHtml(String(a).trim()) : '';
+          var t = (a != null && String(a).trim()) ? renderRichHtml(String(a).trim()) : '';
           if (t) options.push('<li>' + t + '</li>');
         });
         var justificationText = (q.justification != null ? String(q.justification) : '').trim();
-        var justificationHtml = justificationText ? '<div class="modal-question-justification"><strong>Justificativa:</strong> ' + escapeHtml(justificationText) + '</div>' : '';
+        var justificationHtml = justificationText ? '<div class="modal-question-justification"><strong>Justificativa:</strong> ' + renderRichHtml(justificationText) + '</div>' : '';
         block.innerHTML =
           '<div class="modal-question-header">' +
             '<input type="checkbox" class="modal-question-check" id="q' + i + '" checked>' +
@@ -600,7 +608,7 @@
             '<div class="modal-question-header-actions"><button type="button" class="btn-edit" data-edit-index="' + i + '">Editar</button></div>' +
           '</div>' +
           '<div class="modal-question-content">' +
-            '<div class="modal-question-text">' + escapeHtml(questionText) + '</div>' +
+            '<div class="modal-question-text">' + renderRichHtml(questionText) + '</div>' +
             '<ul class="modal-options">' + options.join('') + '</ul>' +
             justificationHtml +
           '</div>';
@@ -613,6 +621,9 @@
           openEditForm(modalBody.querySelector('.modal-question[data-index="' + idx + '"]'), idx);
         });
       });
+      if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+        MathJax.typesetPromise([modalBody]).catch(function () {});
+      }
     }
 
     function openEditForm(block, index) {
