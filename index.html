@@ -461,6 +461,87 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    /* Toggle Modo BQ / Modo IA */
+    .mode-toggle {
+      display: flex;
+      border: 1px solid var(--muted);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-btn.active { background: var(--accent); color: var(--btn-text); }
+    .mode-btn:hover:not(.active) { background: var(--drop-hover-bg); color: var(--text); }
+
+    /* Painel de configurações de IA */
+    .ai-settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+      user-select: none;
+      margin-top: 1rem;
+      border-top: 1px solid var(--muted);
+    }
+    .ai-settings-toggle:hover { color: var(--accent); }
+    .ai-settings-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem 0 0;
+    }
+    .ai-settings-panel.open { display: flex; }
+    .ai-settings-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .ai-settings-row select,
+    .ai-settings-row input[type="text"],
+    .ai-settings-row input[type="password"] {
+      flex: 1;
+      min-width: 0;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+    }
+    .ai-settings-row select:focus,
+    .ai-settings-row input:focus { outline: none; border-color: var(--accent); }
+    .ai-settings-save {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--btn-text);
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ai-settings-save:hover { background: var(--accent-hover); }
+    .ai-saved-badge {
+      font-size: 0.78rem;
+      color: var(--success);
+      display: none;
+      align-self: center;
+    }
   </style>
 </head>
 <body>
@@ -472,8 +553,38 @@
         <span class="theme-switch"></span>
       </label>
     </div>
-    <h1>Conversor BQ DOCX → XML</h1>
-    <p class="sub">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
+    <h1>Conversor BQ → XML (Moodle)</h1>
+
+    <div class="mode-toggle">
+      <button type="button" class="mode-btn active" id="modeBqBtn">BQ Clássico</button>
+      <button type="button" class="mode-btn" id="modeAiBtn">✨ Modo IA</button>
+    </div>
+
+    <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
+
+    <div id="aiSettingsContainer" style="display:none">
+      <div class="ai-settings-toggle" id="aiSettingsToggle">
+        <span>⚙ Configurações de IA</span>
+        <span id="aiSettingsArrow">▼</span>
+      </div>
+      <div class="ai-settings-panel" id="aiSettingsPanel">
+        <div class="ai-settings-row">
+          <select id="aiProviderSelect">
+            <option value="">Provedor…</option>
+            <option value="claude">Claude (Anthropic)</option>
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Gemini (Google)</option>
+          </select>
+          <input type="text" id="aiModelInput" placeholder="Modelo (opcional)"
+            title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | gemini-1.5-flash">
+        </div>
+        <div class="ai-settings-row">
+          <input type="password" id="aiKeyInput" placeholder="API Key">
+          <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
+          <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
+        </div>
+      </div>
+    </div>
 
     <div class="drop-zone" id="dropZone" title="Clique ou arraste arquivos .docx">
       <input type="file" id="fileInput" accept=".docx" multiple>
@@ -524,7 +635,10 @@
   <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] } };</script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="converter.js"></script>
+  <script src="ai-extractor.js"></script>
   <script>
     const THEME_KEY = 'bq-converter-theme';
     const root = document.documentElement;
@@ -567,6 +681,22 @@
     let currentBaseFileName = 'banco-questoes';
     let currentFiles = [];
 
+    // Modo de operação: 'bq' (parser clássico) | 'ai' (extração por IA)
+    let currentMode = 'bq';
+
+    const modeBqBtn           = document.getElementById('modeBqBtn');
+    const modeAiBtn           = document.getElementById('modeAiBtn');
+    const modeDescription     = document.getElementById('modeDescription');
+    const aiSettingsContainer = document.getElementById('aiSettingsContainer');
+    const aiSettingsToggle    = document.getElementById('aiSettingsToggle');
+    const aiSettingsPanel     = document.getElementById('aiSettingsPanel');
+    const aiSettingsArrow     = document.getElementById('aiSettingsArrow');
+    const aiProviderSelect    = document.getElementById('aiProviderSelect');
+    const aiModelInput        = document.getElementById('aiModelInput');
+    const aiKeyInput          = document.getElementById('aiKeyInput');
+    const aiSaveBtn           = document.getElementById('aiSaveBtn');
+    const aiSavedBadge        = document.getElementById('aiSavedBadge');
+
     // ── Mensagens ──────────────────────────────────────────────────────────────
     function showMsg(text, type) {
       msg.textContent = text;
@@ -582,18 +712,77 @@
     }
     function hideSpinner() { spinnerOverlay.classList.remove('active'); }
 
+    // ── Modo BQ / IA ──────────────────────────────────────────────────────────
+    const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls';
+    const BQ_ACCEPT = '.docx';
+
+    function switchMode(mode) {
+      currentMode = mode;
+      modeBqBtn.classList.toggle('active', mode === 'bq');
+      modeAiBtn.classList.toggle('active', mode === 'ai');
+      aiSettingsContainer.style.display = mode === 'ai' ? '' : 'none';
+      fileInput.accept = mode === 'ai' ? AI_ACCEPT : BQ_ACCEPT;
+      modeDescription.textContent = mode === 'ai'
+        ? 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.'
+        : 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.';
+      currentFiles = [];
+      fileListEl.innerHTML = '';
+      btnConvert.disabled = true;
+      btnConvert.textContent = 'Converter para XML';
+      hideMsg();
+    }
+
+    modeBqBtn.addEventListener('click', () => switchMode('bq'));
+    modeAiBtn.addEventListener('click', () => switchMode('ai'));
+
+    // ── Painel de config ──────────────────────────────────────────────────────
+    aiSettingsToggle.addEventListener('click', () => {
+      const open = aiSettingsPanel.classList.toggle('open');
+      aiSettingsArrow.textContent = open ? '▲' : '▼';
+    });
+
+    function loadAiConfig() {
+      if (!window.AIExtractor) return;
+      const cfg = AIExtractor.loadConfig();
+      if (cfg.provider) aiProviderSelect.value = cfg.provider;
+      if (cfg.model)    aiModelInput.value     = cfg.model;
+      if (cfg.apiKey)   aiKeyInput.value       = cfg.apiKey;
+    }
+
+    aiSaveBtn.addEventListener('click', () => {
+      if (!window.AIExtractor) return;
+      AIExtractor.saveConfig({
+        provider: aiProviderSelect.value,
+        model:    aiModelInput.value.trim(),
+        apiKey:   aiKeyInput.value.trim()
+      });
+      aiSavedBadge.style.display = 'inline';
+      setTimeout(() => { aiSavedBadge.style.display = 'none'; }, 2000);
+    });
+
+    loadAiConfig();
+
     // ── Seleção de arquivos ────────────────────────────────────────────────────
     function setFiles(fileList) {
-      const files = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.docx'));
+      const AI_EXTS = ['.docx', '.pdf', '.txt', '.csv', '.xlsx', '.xls'];
+      const files = Array.from(fileList).filter(f => {
+        const name = f.name.toLowerCase();
+        return currentMode === 'ai'
+          ? AI_EXTS.some(ext => name.endsWith(ext))
+          : name.endsWith('.docx');
+      });
       if (files.length === 0) {
-        showMsg('Selecione arquivos .docx', 'error');
+        showMsg(currentMode === 'ai'
+          ? 'Selecione arquivos .docx, .pdf, .txt, .csv, .xlsx ou .xls'
+          : 'Selecione arquivos .docx', 'error');
         return;
       }
       currentFiles = files;
       fileListEl.innerHTML = files.map(f => `<li>📄 ${escapeHtml(f.name)}</li>`).join('');
+      const action = currentMode === 'ai' ? 'Analisar com IA' : 'Converter';
       btnConvert.textContent = files.length === 1
-        ? 'Converter para XML'
-        : `Converter ${files.length} arquivos para XML`;
+        ? `${action} para XML`
+        : `${action} ${files.length} arquivos para XML`;
       btnConvert.disabled = false;
       hideMsg();
     }
@@ -805,38 +994,91 @@
     // ── Converter ──────────────────────────────────────────────────────────────
     btnConvert.addEventListener('click', async () => {
       if (!currentFiles.length) return;
-      if (!window.BQConverter || typeof window.BQConverter.convertDocxToBancoRich !== 'function') {
-        showMsg('Erro: converter.js não carregou. Verifique se está na mesma pasta do index.html.', 'error');
-        return;
-      }
       btnConvert.disabled = true;
       hideMsg();
-      const label = currentFiles.length === 1
-        ? 'Convertendo ' + currentFiles[0].name + '…'
-        : 'Convertendo ' + currentFiles.length + ' arquivos…';
-      showSpinner(label);
-      try {
-        let merged = null;
-        for (let i = 0; i < currentFiles.length; i++) {
-          const f = currentFiles[i];
-          if (currentFiles.length > 1) spinnerLabel.textContent = `Convertendo ${i + 1} / ${currentFiles.length}: ${f.name}…`;
-          const banco = await BQConverter.convertDocxToBancoRich(f);
-          if (!merged) {
-            merged = banco;
-          } else {
-            merged.question_list.push(...banco.question_list);
-          }
+
+      if (currentMode === 'ai') {
+        // ── Modo IA ────────────────────────────────────────────────────────────
+        if (!window.AIExtractor) {
+          showMsg('Erro: ai-extractor.js não carregou.', 'error');
+          btnConvert.disabled = false;
+          return;
         }
-        currentBanco = merged;
-        currentBaseFileName = currentFiles[0].name.replace(/\.docx$/i, '');
-        renderModalQuestions(merged);
-        openModal();
-      } catch (err) {
-        console.error(err);
-        showMsg('Erro ao converter: ' + (err.message || String(err)), 'error');
-      } finally {
-        hideSpinner();
-        btnConvert.disabled = false;
+        const config = AIExtractor.loadConfig();
+        if (!config.apiKey || !config.provider) {
+          showMsg('Configure a chave de API e o provedor em ⚙ Configurações de IA.', 'error');
+          if (!aiSettingsPanel.classList.contains('open')) {
+            aiSettingsPanel.classList.add('open');
+            aiSettingsArrow.textContent = '▲';
+          }
+          btnConvert.disabled = false;
+          return;
+        }
+        showSpinner('Preparando…');
+        try {
+          let allQuestions = [];
+          for (let i = 0; i < currentFiles.length; i++) {
+            const f = currentFiles[i];
+            spinnerLabel.textContent = `Extraindo texto (${i + 1}/${currentFiles.length}): ${f.name}…`;
+            const text = await AIExtractor.extractText(f);
+            if (!text.trim()) {
+              throw new Error(`"${f.name}" não contém texto legível (PDF escaneado ou arquivo vazio).`);
+            }
+            spinnerLabel.textContent = `Analisando com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
+            const questions = await AIExtractor.extractQuestions(text, config);
+            allQuestions = allQuestions.concat(questions);
+          }
+          if (allQuestions.length === 0) {
+            showMsg('A IA não encontrou questões nos arquivos fornecidos. Verifique o conteúdo e tente novamente.', 'error');
+          } else {
+            const banco = AIExtractor.toBancoDeQuestoes(allQuestions);
+            currentBanco = banco;
+            currentBaseFileName = currentFiles[0].name.replace(/\.[^.]+$/, '');
+            renderModalQuestions(banco);
+            openModal();
+          }
+        } catch (err) {
+          console.error(err);
+          showMsg('Erro: ' + (err.message || String(err)), 'error');
+        } finally {
+          hideSpinner();
+          btnConvert.disabled = false;
+        }
+
+      } else {
+        // ── Modo BQ Clássico ───────────────────────────────────────────────────
+        if (!window.BQConverter || typeof window.BQConverter.convertDocxToBancoRich !== 'function') {
+          showMsg('Erro: converter.js não carregou. Verifique se está na mesma pasta do index.html.', 'error');
+          btnConvert.disabled = false;
+          return;
+        }
+        const label = currentFiles.length === 1
+          ? 'Convertendo ' + currentFiles[0].name + '…'
+          : 'Convertendo ' + currentFiles.length + ' arquivos…';
+        showSpinner(label);
+        try {
+          let merged = null;
+          for (let i = 0; i < currentFiles.length; i++) {
+            const f = currentFiles[i];
+            if (currentFiles.length > 1) spinnerLabel.textContent = `Convertendo ${i + 1} / ${currentFiles.length}: ${f.name}…`;
+            const banco = await BQConverter.convertDocxToBancoRich(f);
+            if (!merged) {
+              merged = banco;
+            } else {
+              merged.question_list.push(...banco.question_list);
+            }
+          }
+          currentBanco = merged;
+          currentBaseFileName = currentFiles[0].name.replace(/\.docx$/i, '');
+          renderModalQuestions(merged);
+          openModal();
+        } catch (err) {
+          console.error(err);
+          showMsg('Erro ao converter: ' + (err.message || String(err)), 'error');
+        } finally {
+          hideSpinner();
+          btnConvert.disabled = false;
+        }
       }
     });
 
