@@ -215,24 +215,6 @@
       font-size: 1.1rem;
       font-weight: 600;
     }
-    .modal-actions-top {
-      display: flex;
-      gap: 0.75rem;
-      padding: 0.5rem 1.5rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-      border-bottom: 1px solid var(--muted);
-      flex-shrink: 0;
-    }
-    .modal-actions-top button {
-      background: none;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      padding: 0;
-      text-decoration: underline;
-    }
-    .modal-actions-top button:hover { opacity: 0.9; }
     .modal-body {
       overflow-y: auto;
       flex: 1;
@@ -354,14 +336,6 @@
       display: flex;
       gap: 0.5rem;
     }
-    .modal-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--muted);
-      display: flex;
-      gap: 0.75rem;
-      justify-content: flex-end;
-      flex-shrink: 0;
-    }
     .modal-footer .btn { width: auto; margin-top: 0; }
     .modal-close {
       background: transparent;
@@ -369,6 +343,124 @@
       color: var(--text);
     }
     .modal-close:hover { background: var(--muted); opacity: 0.8; }
+    /* Spinner de carregamento */
+    .spinner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 2000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: #fff;
+    }
+    .spinner-overlay.active { display: flex; }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.25);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-label { font-size: 0.95rem; opacity: 0.9; }
+    /* Barra de ações do modal */
+    .modal-actions-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.5rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--muted);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .actions-left { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .sel-count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 0.15rem 0.5rem;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+    .search-input {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      min-width: 170px;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    /* Footer com categoria */
+    .modal-footer {
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .footer-left { flex: 1; min-width: 0; }
+    .footer-right { display: flex; gap: 0.75rem; flex-shrink: 0; }
+    .category-input {
+      padding: 0.45rem 0.7rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 280px;
+    }
+    .category-input:focus { outline: none; border-color: var(--accent); }
+    /* Botões de reordenação */
+    .btn-order {
+      padding: 0.2rem 0.45rem;
+      font-size: 0.8rem;
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      border-radius: 4px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-order:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-order:disabled { opacity: 0.25; cursor: not-allowed; }
+    /* Badge de problema na questão */
+    .issue-badge {
+      font-size: 0.72rem;
+      color: #c97a10;
+      background: rgba(201,122,16,0.12);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      margin-left: 0.4rem;
+    }
+    /* Lista de arquivos selecionados */
+    .file-list {
+      list-style: none;
+      margin: 0.5rem 0 0;
+      padding: 0;
+      text-align: left;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+    .file-list li {
+      font-size: 0.8rem;
+      color: var(--accent);
+      padding: 0.1rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 <body>
@@ -383,10 +475,10 @@
     <h1>Conversor BQ DOCX → XML</h1>
     <p class="sub">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
 
-    <div class="drop-zone" id="dropZone" title="Clique ou arraste um arquivo .docx">
-      <input type="file" id="fileInput" accept=".docx">
-      <div class="label">Clique ou arraste um arquivo .docx aqui</div>
-      <div class="file-name" id="fileName"></div>
+    <div class="drop-zone" id="dropZone" title="Clique ou arraste arquivos .docx">
+      <input type="file" id="fileInput" accept=".docx" multiple>
+      <div class="label">Clique ou arraste arquivos .docx aqui</div>
+      <ul class="file-list" id="fileList"></ul>
     </div>
 
     <button type="button" class="btn" id="btnConvert" disabled>Converter para XML</button>
@@ -400,20 +492,34 @@
         <h2 id="modalTitle">Revise as questões antes de exportar</h2>
       </div>
       <div class="modal-actions-top">
-        <button type="button" id="btnSelectAll">Selecionar todas</button>
-        <button type="button" id="btnDeselectAll">Desmarcar todas</button>
+        <div class="actions-left">
+          <button type="button" id="btnSelectAll">Selecionar todas</button>
+          <button type="button" id="btnDeselectAll">Desmarcar todas</button>
+          <span class="sel-count" id="selCount"></span>
+        </div>
+        <input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões...">
       </div>
       <div class="modal-body" id="modalBody">
         <!-- questões renderizadas aqui -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
-        <button type="button" class="btn" id="btnExportXml">Exportar XML</button>
+        <div class="footer-left">
+          <input type="text" id="categoryInput" class="category-input" placeholder="Categoria Moodle (opcional)">
+        </div>
+        <div class="footer-right">
+          <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
+          <button type="button" class="btn" id="btnExportXml">Exportar XML</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <footer>Feito com Carinho 💚 por Gerencia de Qualidade - UNICIVE</footer>
+  <div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner"></div>
+    <div class="spinner-label" id="spinnerLabel">Convertendo...</div>
+  </div>
+
+  <footer>Feito com Carinho 💚 por Gerencia de Qualidade - UNICIVE &nbsp;·&nbsp; v1.2.2</footer>
 
   <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] } };</script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -432,61 +538,71 @@
       return 'dark';
     }
     function applyTheme(theme) {
-      if (theme === 'light') {
-        root.setAttribute('data-theme', 'light');
-      } else {
-        root.removeAttribute('data-theme');
-      }
+      root[theme === 'light' ? 'setAttribute' : 'removeAttribute']('data-theme', 'light');
       themeToggle.checked = theme === 'light';
       themeLabel.textContent = theme === 'light' ? 'Claro' : 'Escuro';
       localStorage.setItem(THEME_KEY, theme);
     }
     applyTheme(getPreferredTheme());
-    themeToggle.addEventListener('change', () => {
-      applyTheme(themeToggle.checked ? 'light' : 'dark');
-    });
+    themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'light' : 'dark'));
 
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const fileName = document.getElementById('fileName');
-    const btnConvert = document.getElementById('btnConvert');
-    const msg = document.getElementById('msg');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalBody = document.getElementById('modalBody');
-    const btnSelectAll = document.getElementById('btnSelectAll');
-    const btnDeselectAll = document.getElementById('btnDeselectAll');
+    const dropZone      = document.getElementById('dropZone');
+    const fileInput     = document.getElementById('fileInput');
+    const fileListEl    = document.getElementById('fileList');
+    const btnConvert    = document.getElementById('btnConvert');
+    const msg           = document.getElementById('msg');
+    const modalOverlay  = document.getElementById('modalOverlay');
+    const modalBody     = document.getElementById('modalBody');
+    const btnSelectAll  = document.getElementById('btnSelectAll');
+    const btnDeselectAll= document.getElementById('btnDeselectAll');
     const btnModalClose = document.getElementById('btnModalClose');
-    const btnExportXml = document.getElementById('btnExportXml');
+    const btnExportXml  = document.getElementById('btnExportXml');
+    const selCount      = document.getElementById('selCount');
+    const searchInput   = document.getElementById('searchInput');
+    const categoryInput = document.getElementById('categoryInput');
+    const spinnerOverlay= document.getElementById('spinnerOverlay');
+    const spinnerLabel  = document.getElementById('spinnerLabel');
 
     let currentBanco = null;
     let currentBaseFileName = 'banco-questoes';
+    let currentFiles = [];
 
+    // ── Mensagens ──────────────────────────────────────────────────────────────
     function showMsg(text, type) {
       msg.textContent = text;
       msg.className = 'msg ' + (type || '');
       msg.classList.remove('hide');
     }
-    function hideMsg() {
-      msg.classList.add('hide');
+    function hideMsg() { msg.classList.add('hide'); }
+
+    // ── Spinner ────────────────────────────────────────────────────────────────
+    function showSpinner(label) {
+      spinnerLabel.textContent = label || 'Convertendo...';
+      spinnerOverlay.classList.add('active');
     }
-    function setFile(file) {
-      if (!file) {
-        fileName.textContent = '';
-        btnConvert.disabled = true;
+    function hideSpinner() { spinnerOverlay.classList.remove('active'); }
+
+    // ── Seleção de arquivos ────────────────────────────────────────────────────
+    function setFiles(fileList) {
+      const files = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.docx'));
+      if (files.length === 0) {
+        showMsg('Selecione arquivos .docx', 'error');
         return;
       }
-      if (!file.name.toLowerCase().endsWith('.docx')) {
-        showMsg('Selecione um arquivo .docx', 'error');
-        return;
-      }
-      fileName.textContent = file.name;
+      currentFiles = files;
+      fileListEl.innerHTML = files.map(f => `<li>📄 ${escapeHtml(f.name)}</li>`).join('');
+      btnConvert.textContent = files.length === 1
+        ? 'Converter para XML'
+        : `Converter ${files.length} arquivos para XML`;
       btnConvert.disabled = false;
       hideMsg();
     }
 
+    // ── Modal ──────────────────────────────────────────────────────────────────
     function openModal() {
       modalOverlay.classList.add('open');
       modalOverlay.setAttribute('aria-hidden', 'false');
+      searchInput.value = '';
     }
     function closeModal() {
       modalOverlay.classList.remove('open');
@@ -494,33 +610,89 @@
       currentBanco = null;
     }
 
+    // ── Contador de seleção ────────────────────────────────────────────────────
+    function updateCounter() {
+      const all     = modalBody.querySelectorAll('.modal-question-check').length;
+      const checked = modalBody.querySelectorAll('.modal-question-check:checked').length;
+      selCount.textContent = checked + ' / ' + all + ' selecionadas';
+    }
+
+    // ── Filtro de questões ─────────────────────────────────────────────────────
+    function filterQuestions(term) {
+      const t = term.toLowerCase().trim();
+      modalBody.querySelectorAll('.modal-question').forEach(block => {
+        block.style.display = (!t || block.textContent.toLowerCase().includes(t)) ? '' : 'none';
+      });
+    }
+
+    // ── Reordenação ────────────────────────────────────────────────────────────
+    function moveQuestion(idx, dir) {
+      const list = currentBanco.question_list;
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= list.length) return;
+      [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+      renderModalQuestions(currentBanco);
+    }
+
+    // ── Validação ──────────────────────────────────────────────────────────────
+    function getQuestionIssues(q) {
+      const issues = [];
+      const plainText = s => String(s || '').replace(/<[^>]+>/g, '').trim();
+      if (!plainText(q.question)) issues.push('enunciado vazio');
+      if (!plainText(q.correct_answer)) issues.push('resposta correta vazia');
+      const filledWrongs = (q.wrong_answer_list || []).filter(a => plainText(a));
+      if (filledWrongs.length === 0) issues.push('sem alternativas erradas');
+      return issues;
+    }
+
+    // ── Render helper ──────────────────────────────────────────────────────────
     function renderRichHtml(s) {
       if (s == null) return '';
       return String(s).replace(/\n/g, '<br>');
     }
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s == null ? '' : String(s);
+      return div.innerHTML;
+    }
 
+    // ── Renderizar questões ────────────────────────────────────────────────────
     function renderModalQuestions(banco) {
       const list = banco.question_list || [];
       modalBody.innerHTML = '';
       list.forEach((q, i) => {
+        const issues = getQuestionIssues(q);
         const block = document.createElement('div');
         block.className = 'modal-question';
         block.dataset.index = String(i);
-        const questionText = (q.question != null ? String(q.question) : '').trim();
-        const correctText = (q.correct_answer != null ? String(q.correct_answer) : '').trim();
-        const options = [];
-        options.push('<li class="correct">' + renderRichHtml(correctText) + ' <span style="font-size:0.8em;color:var(--success)">(Correta)</span></li>');
+
+        const questionText  = (q.question != null ? String(q.question) : '').trim();
+        const correctText   = (q.correct_answer != null ? String(q.correct_answer) : '').trim();
+        const options = [
+          '<li class="correct">' + renderRichHtml(correctText) + ' <span style="font-size:0.8em;color:var(--success)">(Correta)</span></li>'
+        ];
         (q.wrong_answer_list || []).forEach(a => {
           const t = (a != null && String(a).trim()) ? renderRichHtml(String(a).trim()) : '';
           if (t) options.push('<li>' + t + '</li>');
         });
         const justificationText = (q.justification != null ? String(q.justification) : '').trim();
-        const justificationHtml = justificationText ? '<div class="modal-question-justification"><strong>Justificativa:</strong> ' + renderRichHtml(justificationText) + '</div>' : '';
+        const justificationHtml = justificationText
+          ? '<div class="modal-question-justification"><strong>Justificativa:</strong> ' + renderRichHtml(justificationText) + '</div>'
+          : '';
+        const issueBadge = issues.length
+          ? '<span class="issue-badge" title="' + escapeHtml(issues.join(', ')) + '">⚠ ' + escapeHtml(issues[0]) + '</span>'
+          : '';
+        const isFirst = i === 0, isLast = i === list.length - 1;
+
         block.innerHTML =
           '<div class="modal-question-header">' +
             '<input type="checkbox" class="modal-question-check" id="q' + i + '" checked>' +
-            '<label for="q' + i + '" class="modal-question-num">Questão ' + (i + 1) + '</label>' +
-            '<div class="modal-question-header-actions"><button type="button" class="btn-edit" data-edit-index="' + i + '">Editar</button></div>' +
+            '<label for="q' + i + '" class="modal-question-num">Questão ' + (i + 1) + issueBadge + '</label>' +
+            '<div class="modal-question-header-actions">' +
+              '<button type="button" class="btn-order" data-move="-1" data-idx="' + i + '" title="Mover para cima"' + (isFirst ? ' disabled' : '') + '>▲</button>' +
+              '<button type="button" class="btn-order" data-move="1"  data-idx="' + i + '" title="Mover para baixo"' + (isLast ? ' disabled' : '') + '>▼</button>' +
+              '<button type="button" class="btn-edit" data-edit-index="' + i + '">Editar</button>' +
+            '</div>' +
           '</div>' +
           '<div class="modal-question-content">' +
             '<div class="modal-question-text">' + renderRichHtml(questionText) + '</div>' +
@@ -529,6 +701,14 @@
           '</div>';
         modalBody.appendChild(block);
       });
+
+      modalBody.querySelectorAll('.btn-order').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx, 10);
+          const dir = parseInt(btn.dataset.move, 10);
+          moveQuestion(idx, dir);
+        });
+      });
       modalBody.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = parseInt(btn.getAttribute('data-edit-index'), 10);
@@ -536,11 +716,17 @@
           openEditForm(modalBody.querySelector('.modal-question[data-index="' + idx + '"]'), idx);
         });
       });
+      modalBody.querySelectorAll('.modal-question-check').forEach(cb => {
+        cb.addEventListener('change', updateCounter);
+      });
+
+      updateCounter();
       if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
         MathJax.typesetPromise([modalBody]).catch(() => {});
       }
     }
 
+    // ── Edição inline ──────────────────────────────────────────────────────────
     function openEditForm(block, index) {
       const q = currentBanco.question_list[index];
       const wrongList = q.wrong_answer_list || [];
@@ -567,43 +753,33 @@
           '</div>' +
         '</div>';
       const content = block.querySelector('.modal-question-content');
-      if (content) {
-        content.innerHTML = editHtml;
-        const wrongListEl = content.querySelector('.wrong-list');
-        content.querySelector('#btnAddWrong').addEventListener('click', () => {
-          const div = document.createElement('div');
-          div.className = 'wrong-item';
-          div.innerHTML = '<textarea class="edit-wrong" rows="2" placeholder="Nova alternativa"></textarea><button type="button" class="btn-small btn-remove-wrong" title="Remover">−</button>';
-          wrongListEl.appendChild(div);
-          div.querySelector('.btn-remove-wrong').addEventListener('click', () => div.remove());
-        });
-        content.querySelectorAll('.btn-remove-wrong').forEach(btn => {
-          btn.addEventListener('click', () => btn.closest('.wrong-item').remove());
-        });
-        content.querySelector('.btn-cancel-edit').addEventListener('click', () => {
-          renderModalQuestions(currentBanco);
-        });
-        content.querySelector('.btn-save-edit').addEventListener('click', () => {
-          const question = content.querySelector('.edit-question').value.trim();
-          const correct = content.querySelector('.edit-correct').value.trim();
-          const wrongs = Array.from(content.querySelectorAll('.edit-wrong')).map(ta => ta.value.trim()).filter(Boolean);
-          const justification = content.querySelector('.edit-justification').value.trim();
-          q.question = question;
-          q.correct_answer = correct;
-          q.wrong_answer_list = wrongs;
-          q.justification = justification;
-          renderModalQuestions(currentBanco);
-        });
-      }
-    }
-    function escapeHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s == null ? '' : String(s);
-      return div.innerHTML;
+      if (!content) return;
+      content.innerHTML = editHtml;
+      const wrongListEl = content.querySelector('.wrong-list');
+      content.querySelector('#btnAddWrong').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'wrong-item';
+        div.innerHTML = '<textarea class="edit-wrong" rows="2" placeholder="Nova alternativa"></textarea><button type="button" class="btn-small btn-remove-wrong" title="Remover">−</button>';
+        wrongListEl.appendChild(div);
+        div.querySelector('.btn-remove-wrong').addEventListener('click', () => div.remove());
+      });
+      content.querySelectorAll('.btn-remove-wrong').forEach(btn => {
+        btn.addEventListener('click', () => btn.closest('.wrong-item').remove());
+      });
+      content.querySelector('.btn-cancel-edit').addEventListener('click', () => renderModalQuestions(currentBanco));
+      content.querySelector('.btn-save-edit').addEventListener('click', () => {
+        q.question      = content.querySelector('.edit-question').value.trim();
+        q.correct_answer= content.querySelector('.edit-correct').value.trim();
+        q.wrong_answer_list = Array.from(content.querySelectorAll('.edit-wrong')).map(ta => ta.value.trim()).filter(Boolean);
+        q.justification = content.querySelector('.edit-justification').value.trim();
+        renderModalQuestions(currentBanco);
+      });
     }
 
+    // ── Seleção em massa ───────────────────────────────────────────────────────
     function setAllChecks(checked) {
       modalBody.querySelectorAll('.modal-question-check').forEach(cb => { cb.checked = checked; });
+      updateCounter();
     }
     function getCheckedQuestions() {
       const indexes = [];
@@ -615,50 +791,63 @@
       return indexes.sort((a, b) => a - b);
     }
 
+    // ── Eventos de arquivo ─────────────────────────────────────────────────────
     dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', e => {
       e.preventDefault();
       dropZone.classList.remove('dragover');
-      const f = e.dataTransfer.files[0];
-      if (f) setFile(f);
+      if (e.dataTransfer.files.length) setFiles(e.dataTransfer.files);
     });
-    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+    fileInput.addEventListener('change', () => { if (fileInput.files.length) setFiles(fileInput.files); });
 
+    // ── Converter ──────────────────────────────────────────────────────────────
     btnConvert.addEventListener('click', async () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+      if (!currentFiles.length) return;
       if (!window.BQConverter || typeof window.BQConverter.convertDocxToBancoRich !== 'function') {
-        showMsg('Erro: converter.js não carregou. Verifique se o arquivo converter.js está na mesma pasta do index.html.', 'error');
+        showMsg('Erro: converter.js não carregou. Verifique se está na mesma pasta do index.html.', 'error');
         return;
       }
       btnConvert.disabled = true;
       hideMsg();
+      const label = currentFiles.length === 1
+        ? 'Convertendo ' + currentFiles[0].name + '…'
+        : 'Convertendo ' + currentFiles.length + ' arquivos…';
+      showSpinner(label);
       try {
-        const banco = await BQConverter.convertDocxToBancoRich(file);
-        currentBanco = banco;
-        currentBaseFileName = file.name.replace(/\.docx$/i, '');
-        renderModalQuestions(banco);
+        let merged = null;
+        for (let i = 0; i < currentFiles.length; i++) {
+          const f = currentFiles[i];
+          if (currentFiles.length > 1) spinnerLabel.textContent = `Convertendo ${i + 1} / ${currentFiles.length}: ${f.name}…`;
+          const banco = await BQConverter.convertDocxToBancoRich(f);
+          if (!merged) {
+            merged = banco;
+          } else {
+            merged.question_list.push(...banco.question_list);
+          }
+        }
+        currentBanco = merged;
+        currentBaseFileName = currentFiles[0].name.replace(/\.docx$/i, '');
+        renderModalQuestions(merged);
         openModal();
       } catch (err) {
         console.error(err);
         showMsg('Erro ao converter: ' + (err.message || String(err)), 'error');
       } finally {
+        hideSpinner();
         btnConvert.disabled = false;
       }
     });
 
+    // ── Ações do modal ─────────────────────────────────────────────────────────
     btnSelectAll.addEventListener('click', () => setAllChecks(true));
     btnDeselectAll.addEventListener('click', () => setAllChecks(false));
     btnModalClose.addEventListener('click', closeModal);
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
+    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+    searchInput.addEventListener('input', () => filterQuestions(searchInput.value));
 
+    // ── Exportar XML ───────────────────────────────────────────────────────────
     btnExportXml.addEventListener('click', () => {
       if (!currentBanco || !currentBanco.question_list) return;
       const indexes = getCheckedQuestions();
@@ -667,7 +856,19 @@
         return;
       }
       const filtered = indexes.map(i => currentBanco.question_list[i]).filter(Boolean);
-      const xml = currentBanco.toXmlString(filtered);
+
+      const allIssues = [];
+      filtered.forEach((q, pos) => {
+        const issues = getQuestionIssues(q);
+        if (issues.length) allIssues.push('Questão ' + (indexes[pos] + 1) + ': ' + issues.join(', '));
+      });
+      if (allIssues.length > 0) {
+        const preview = allIssues.slice(0, 5).join('\n') + (allIssues.length > 5 ? '\n...' : '');
+        if (!window.confirm(allIssues.length + ' questão(ões) com problemas:\n\n' + preview + '\n\nExportar mesmo assim?')) return;
+      }
+
+      const category = categoryInput.value.trim();
+      const xml = currentBanco.toXmlString(filtered, category || undefined);
       const blob = new Blob([xml], { type: 'application/xml; charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
