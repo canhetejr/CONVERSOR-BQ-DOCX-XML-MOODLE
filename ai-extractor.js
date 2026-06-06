@@ -147,6 +147,27 @@ AIExtractor._callOpenAI = async function (prompt, config) {
   return data.choices[0].message.content;
 };
 
+AIExtractor._callOpenRouter = async function (prompt, config) {
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.apiKey}`
+    },
+    body: JSON.stringify({
+      model: config.model || 'openai/gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`OpenRouter API ${resp.status}: ${err.error?.message || resp.statusText}`);
+  }
+  const data = await resp.json();
+  if (!data.choices?.[0]?.message?.content) throw new Error('OpenRouter API retornou resposta inesperada.');
+  return data.choices[0].message.content;
+};
+
 AIExtractor._callGemini = async function (prompt, config) {
   const model = config.model || 'gemini-1.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
@@ -180,9 +201,10 @@ AIExtractor.extractQuestions = async function (text, config) {
   const prompt = AIExtractor._buildPrompt(text);
   let raw;
   switch (config.provider) {
-    case 'claude': raw = await AIExtractor._callClaude(prompt, config); break;
-    case 'openai': raw = await AIExtractor._callOpenAI(prompt, config); break;
-    case 'gemini': raw = await AIExtractor._callGemini(prompt, config); break;
+    case 'claude':      raw = await AIExtractor._callClaude(prompt, config);      break;
+    case 'openai':      raw = await AIExtractor._callOpenAI(prompt, config);      break;
+    case 'openrouter':  raw = await AIExtractor._callOpenRouter(prompt, config);  break;
+    case 'gemini':      raw = await AIExtractor._callGemini(prompt, config);      break;
     default: throw new Error(`Provedor desconhecido: ${config.provider}`);
   }
 
