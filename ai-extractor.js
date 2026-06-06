@@ -69,6 +69,165 @@ AIExtractor._extractXlsxText = async function (file) {
   return parts.join('\n');
 };
 
+// ── Suporte a imagens ─────────────────────────────────────────────────────────
+
+AIExtractor._isImageFile = function (file) {
+  return /\.(jpe?g|png|gif|webp|bmp)$/i.test(file.name);
+};
+
+AIExtractor._toBase64 = function (buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+};
+
+AIExtractor._imagePrompt =
+`Você é um assistente especializado em extrair questões de provas e concursos a partir de imagens.
+
+Analise a imagem e extraia TODAS as questões encontradas.
+Para cada questão, identifique:
+- O enunciado completo (pergunta ou problema)
+- A resposta correta
+- As alternativas erradas (até 4; se houver menos, inclua as que existirem)
+- A justificativa ou gabarito explicativo (string vazia se não houver)
+
+Se a imagem contiver gabarito separado das questões, associe as respostas corretas às questões correspondentes.
+
+Retorne APENAS um array JSON válido no formato abaixo, sem texto adicional antes ou depois:
+[
+  {
+    "question": "enunciado completo da questão",
+    "correct_answer": "texto da resposta correta",
+    "wrong_answer_list": ["alternativa errada 1", "alternativa errada 2"],
+    "justification": ""
+  }
+]`;
+
+AIExtractor._callClaudeVision = async function (file, config) {
+  const base64 = AIExtractor._toBase64(await file.arrayBuffer());
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': config.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-allow-browser': 'true'
+    },
+    body: JSON.stringify({
+      model: config.model || 'claude-haiku-4-5-20251001',
+      max_tokens: 8192,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+          { type: 'text', text: AIExtractor._imagePrompt }
+        ]
+      }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`Claude API ${resp.status}: ${err.error?.message || resp.statusText}`);
+  }
+  const data = await resp.json();
+  if (!data.content?.[0]?.text) throw new Error('Claude API retornou resposta inesperada.');
+  return data.content[0].text;
+};
+
+AIExtractor._callOpenAIVision = async function (file, config, url) {
+  const base64 = AIExtractor._toBase64(await file.arrayBuffer());
+  const dataUrl = `data:${file.type || 'image/jpeg'};base64,${base64}`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.apiKey}`
+    },
+    body: JSON.stringify({
+      model: config.model || 'gpt-4o-mini',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: dataUrl } },
+          { type: 'text', text: AIExtractor._imagePrompt }
+        ]
+      }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`API ${resp.status}: ${err.error?.message || resp.statusText}`);
+  }
+  const data = await resp.json();
+  if (!data.choices?.[0]?.message?.content) throw new Error('API retornou resposta inesperada.');
+  return data.choices[0].message.content;
+};
+
+AIExtractor._callGeminiVision = async function (file, config) {
+  const base64 = AIExtractor._toBase64(await file.arrayBuffer());
+  const model = config.model || 'gemini-1.5-flash';
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.apiKey },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: file.type || 'image/jpeg', data: base64 } },
+            { text: AIExtractor._imagePrompt }
+          ]
+        }]
+      })
+    }
+  );
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`Gemini API ${resp.status}: ${err.error?.message || resp.statusText}`);
+  }
+  const data = await resp.json();
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error('Gemini API retornou resposta inesperada.');
+  return data.candidates[0].content.parts[0].text;
+};
+
+/**
+ * Envia uma imagem diretamente à API de visão e retorna array de questões.
+ * @param {File} file
+ * @param {object} config - { provider, apiKey, model }
+ * @returns {Promise<Array>}
+ */
+AIExtractor.extractQuestionsFromImage = async function (file, config) {
+  if (!config.apiKey)   throw new Error('Chave de API não configurada. Clique em ⚙ Configurações de IA.');
+  if (!config.provider) throw new Error('Provedor de IA não selecionado.');
+
+  let raw;
+  switch (config.provider) {
+    case 'claude':
+      raw = await AIExtractor._callClaudeVision(file, config);
+      break;
+    case 'openai':
+      raw = await AIExtractor._callOpenAIVision(file, config, 'https://api.openai.com/v1/chat/completions');
+      break;
+    case 'openrouter':
+      raw = await AIExtractor._callOpenAIVision(file, config, 'https://openrouter.ai/api/v1/chat/completions');
+      break;
+    case 'gemini':
+      raw = await AIExtractor._callGeminiVision(file, config);
+      break;
+    default:
+      throw new Error(`Provedor desconhecido: ${config.provider}`);
+  }
+
+  const match = raw.match(/\[[\s\S]*\]/);
+  if (!match) throw new Error('A IA não retornou um JSON válido para a imagem. Tente novamente.');
+  let questions;
+  try { questions = JSON.parse(match[0]); }
+  catch (e) { throw new Error('Falha ao parsear resposta da IA: ' + e.message); }
+  if (!Array.isArray(questions)) throw new Error('Resposta da IA não é um array de questões.');
+  return questions;
+};
+
 // ── Prompt e provedores ───────────────────────────────────────────────────────
 
 AIExtractor._buildPrompt = function (text) {

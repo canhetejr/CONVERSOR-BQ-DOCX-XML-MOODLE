@@ -756,7 +756,7 @@
     function hideSpinner() { spinnerOverlay.classList.remove('active'); }
 
     // ── Modo BQ / IA ──────────────────────────────────────────────────────────
-    const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls';
+    const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.gif,.bmp';
     const BQ_ACCEPT = '.docx';
 
     function switchMode(mode) {
@@ -807,7 +807,7 @@
 
     // ── Seleção de arquivos ────────────────────────────────────────────────────
     function setFiles(fileList) {
-      const AI_EXTS = ['.docx', '.pdf', '.txt', '.csv', '.xlsx', '.xls'];
+      const AI_EXTS = ['.docx', '.pdf', '.txt', '.csv', '.xlsx', '.xls', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
       const files = Array.from(fileList).filter(f => {
         const name = f.name.toLowerCase();
         return currentMode === 'ai'
@@ -816,7 +816,7 @@
       });
       if (files.length === 0) {
         showMsg(currentMode === 'ai'
-          ? 'Selecione arquivos .docx, .pdf, .txt, .csv, .xlsx ou .xls'
+          ? 'Selecione arquivos .docx, .pdf, .txt, .csv, .xlsx, .xls, .jpg, .png ou .webp'
           : 'Selecione arquivos .docx', 'error');
         return;
       }
@@ -1062,13 +1062,19 @@
           let allQuestions = [];
           for (let i = 0; i < currentFiles.length; i++) {
             const f = currentFiles[i];
-            spinnerLabel.textContent = `Extraindo texto (${i + 1}/${currentFiles.length}): ${f.name}…`;
-            const text = await AIExtractor.extractText(f);
-            if (!text.trim()) {
-              throw new Error(`"${f.name}" não contém texto legível (PDF escaneado ou arquivo vazio).`);
+            let questions;
+            if (AIExtractor._isImageFile(f)) {
+              spinnerLabel.textContent = `Analisando imagem com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
+              questions = await AIExtractor.extractQuestionsFromImage(f, config);
+            } else {
+              spinnerLabel.textContent = `Extraindo texto (${i + 1}/${currentFiles.length}): ${f.name}…`;
+              const text = await AIExtractor.extractText(f);
+              if (!text.trim()) {
+                throw new Error(`"${f.name}" não contém texto legível (PDF escaneado ou arquivo vazio).`);
+              }
+              spinnerLabel.textContent = `Analisando com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
+              questions = await AIExtractor.extractQuestions(text, config);
             }
-            spinnerLabel.textContent = `Analisando com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
-            const questions = await AIExtractor.extractQuestions(text, config);
             allQuestions = allQuestions.concat(questions);
           }
           if (allQuestions.length === 0) {
