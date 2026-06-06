@@ -1066,6 +1066,14 @@
             if (AIExtractor._isImageFile(f)) {
               spinnerLabel.textContent = `Analisando imagem com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
               questions = await AIExtractor.extractQuestionsFromImage(f, config);
+            } else if (f.name.toLowerCase().endsWith('.docx')) {
+              spinnerLabel.textContent = `Extraindo texto e imagens (${i + 1}/${currentFiles.length}): ${f.name}…`;
+              const { text, images } = await AIExtractor._extractDocxContent(f);
+              if (!text.trim() && images.length === 0) {
+                throw new Error(`"${f.name}" não contém conteúdo legível.`);
+              }
+              spinnerLabel.textContent = `Analisando com IA (${i + 1}/${currentFiles.length}): ${f.name}…`;
+              questions = await AIExtractor.extractQuestions(text, config, images.length ? images : undefined);
             } else {
               spinnerLabel.textContent = `Extraindo texto (${i + 1}/${currentFiles.length}): ${f.name}…`;
               const text = await AIExtractor.extractText(f);

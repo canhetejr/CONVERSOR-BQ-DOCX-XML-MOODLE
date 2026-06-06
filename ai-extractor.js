@@ -33,13 +33,29 @@ AIExtractor.extractText = async function (file) {
 };
 
 AIExtractor._extractDocxText = async function (file) {
+  const { text } = await AIExtractor._extractDocxContent(file);
+  return text;
+};
+
+// Retorna { text: string, images: [{mimeType, base64}] } preservando imagens embutidas
+AIExtractor._extractDocxContent = async function (file) {
   if (!window.BQConverter) throw new Error('converter.js não carregado');
   const buf = await file.arrayBuffer();
   const paragraphs = await BQConverter.readDocxRich(buf);
-  return paragraphs
-    .map(p => String(p || '').replace(/<[^>]+>/g, '').trim())
-    .filter(Boolean)
-    .join('\n');
+  const textLines = [];
+  const images = [];
+  const imgRe = /<img[^>]+src="data:([^;]+);base64,([A-Za-z0-9+/=]+)"[^>]*/gi;
+  paragraphs.forEach(p => {
+    const html = String(p || '');
+    let m;
+    while ((m = imgRe.exec(html)) !== null) {
+      images.push({ mimeType: m[1], base64: m[2] });
+    }
+    imgRe.lastIndex = 0;
+    const text = html.replace(/<[^>]+>/g, '').trim();
+    if (text) textLines.push(text);
+  });
+  return { text: textLines.join('\n'), images };
 };
 
 AIExtractor._extractPdfText = async function (file) {
@@ -269,7 +285,12 @@ TEXTO:
 ${body}`;
 };
 
-AIExtractor._callClaude = async function (prompt, config) {
+// images = [{mimeType, base64}, ...] — opcional; quando presente usa request multi-modal
+AIExtractor._callClaude = async function (prompt, config, images) {
+  const content = [
+    ...(images || []).map(img => ({ type: 'image', source: { type: 'base64', media_type: img.mimeType, data: img.base64 } })),
+    { type: 'text', text: prompt }
+  ];
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -281,7 +302,7 @@ AIExtractor._callClaude = async function (prompt, config) {
     body: JSON.stringify({
       model: config.model || 'claude-haiku-4-5-20251001',
       max_tokens: 8192,
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content }]
     })
   });
   if (!resp.ok) {
@@ -293,16 +314,17 @@ AIExtractor._callClaude = async function (prompt, config) {
   return data.content[0].text;
 };
 
-AIExtractor._callOpenAI = async function (prompt, config) {
+AIExtractor._callOpenAI = async function (prompt, config, images) {
+  const content = [
+    ...(images || []).map(img => ({ type: 'image_url', image_url: { url: `data:${img.mimeType};base64,${img.base64}` } })),
+    { type: 'text', text: prompt }
+  ];
   const resp = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.apiKey}`
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
     body: JSON.stringify({
       model: config.model || 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: (images && images.length) ? content : prompt }]
     })
   });
   if (!resp.ok) {
@@ -314,16 +336,17 @@ AIExtractor._callOpenAI = async function (prompt, config) {
   return data.choices[0].message.content;
 };
 
-AIExtractor._callOpenRouter = async function (prompt, config) {
+AIExtractor._callOpenRouter = async function (prompt, config, images) {
+  const content = [
+    ...(images || []).map(img => ({ type: 'image_url', image_url: { url: `data:${img.mimeType};base64,${img.base64}` } })),
+    { type: 'text', text: prompt }
+  ];
   const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.apiKey}`
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
     body: JSON.stringify({
       model: config.model || 'openai/gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: (images && images.length) ? content : prompt }]
     })
   });
   if (!resp.ok) {
@@ -335,17 +358,20 @@ AIExtractor._callOpenRouter = async function (prompt, config) {
   return data.choices[0].message.content;
 };
 
-AIExtractor._callGemini = async function (prompt, config) {
+AIExtractor._callGemini = async function (prompt, config, images) {
+  const parts = [
+    ...(images || []).map(img => ({ inline_data: { mime_type: img.mimeType, data: img.base64 } })),
+    { text: prompt }
+  ];
   const model = config.model || 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': config.apiKey
-    },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-  });
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.apiKey },
+      body: JSON.stringify({ contents: [{ parts }] })
+    }
+  );
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(`Gemini API ${resp.status}: ${err.error?.message || resp.statusText}`);
@@ -359,19 +385,20 @@ AIExtractor._callGemini = async function (prompt, config) {
  * Chama a API de IA e retorna array de questões extraídas.
  * @param {string} text - Texto bruto do arquivo
  * @param {object} config - { provider, apiKey, model }
+ * @param {Array} [images] - [{mimeType, base64}] imagens embutidas (ex: de DOCX)
  * @returns {Promise<Array>}
  */
-AIExtractor.extractQuestions = async function (text, config) {
+AIExtractor.extractQuestions = async function (text, config, images) {
   if (!config.apiKey)  throw new Error('Chave de API não configurada. Clique em ⚙ Configurações de IA.');
   if (!config.provider) throw new Error('Provedor de IA não selecionado.');
 
   const prompt = AIExtractor._buildPrompt(text);
   let raw;
   switch (config.provider) {
-    case 'claude':      raw = await AIExtractor._callClaude(prompt, config);      break;
-    case 'openai':      raw = await AIExtractor._callOpenAI(prompt, config);      break;
-    case 'openrouter':  raw = await AIExtractor._callOpenRouter(prompt, config);  break;
-    case 'gemini':      raw = await AIExtractor._callGemini(prompt, config);      break;
+    case 'claude':      raw = await AIExtractor._callClaude(prompt, config, images);      break;
+    case 'openai':      raw = await AIExtractor._callOpenAI(prompt, config, images);      break;
+    case 'openrouter':  raw = await AIExtractor._callOpenRouter(prompt, config, images);  break;
+    case 'gemini':      raw = await AIExtractor._callGemini(prompt, config, images);      break;
     default: throw new Error(`Provedor desconhecido: ${config.provider}`);
   }
 
