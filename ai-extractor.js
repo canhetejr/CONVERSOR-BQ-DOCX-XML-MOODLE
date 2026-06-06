@@ -75,6 +75,14 @@ AIExtractor._isImageFile = function (file) {
   return /\.(jpe?g|png|gif|webp|bmp)$/i.test(file.name);
 };
 
+AIExtractor._imageMime = function (file) {
+  if (file.type) return file.type;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const map = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+                gif: 'image/gif',  webp: 'image/webp', bmp: 'image/bmp' };
+  return map[ext] || 'image/jpeg';
+};
+
 AIExtractor._toBase64 = function (buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -120,7 +128,7 @@ AIExtractor._callClaudeVision = async function (file, config) {
       messages: [{
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+          { type: 'image', source: { type: 'base64', media_type: AIExtractor._imageMime(file), data: base64 } },
           { type: 'text', text: AIExtractor._imagePrompt }
         ]
       }]
@@ -137,7 +145,7 @@ AIExtractor._callClaudeVision = async function (file, config) {
 
 AIExtractor._callOpenAIVision = async function (file, config, url) {
   const base64 = AIExtractor._toBase64(await file.arrayBuffer());
-  const dataUrl = `data:${file.type || 'image/jpeg'};base64,${base64}`;
+  const dataUrl = `data:${AIExtractor._imageMime(file)};base64,${base64}`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -175,7 +183,7 @@ AIExtractor._callGeminiVision = async function (file, config) {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { inline_data: { mime_type: file.type || 'image/jpeg', data: base64 } },
+            { inline_data: { mime_type: AIExtractor._imageMime(file), data: base64 } },
             { text: AIExtractor._imagePrompt }
           ]
         }]
