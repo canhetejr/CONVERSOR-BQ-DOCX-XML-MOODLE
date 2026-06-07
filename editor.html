@@ -3,52 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor BQ – Conversor BQ DOCX → XML</title>
+  <title>Editor BQ — Morfo · TanIA</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="page-editor">
-  <header class="editor-header">
-    <div class="editor-header-left">
-      <h1>Editor BQ</h1>
-      <a href="index.html">← Voltar ao Conversor</a>
-    </div>
-    <div class="theme-toggle">
-      <span id="themeLabel">Escuro</span>
-      <label>
-        <input type="checkbox" id="themeToggle" aria-label="Alternar tema">
-        <span class="theme-switch"></span>
-      </label>
-    </div>
-  </header>
 
-  <div class="editor-wrap">
-    <div class="editor-toolbar">
-      <button type="button" class="btn-insert" data-insert="#Questão">#Questão</button>
-      <button type="button" class="btn-insert" data-insert="#Resposta">#Resposta</button>
-      <button type="button" class="btn-insert" data-insert="#Justificativa">#Justificativa</button>
-      <button type="button" class="btn-insert" data-insert="#Final">#Final</button>
-      <button type="button" class="btn-insert primary" id="btnInsertTemplate">Modelo</button>
-      <label class="file-label">
-        Carregar .txt
-        <input type="file" id="fileLoadTxt" accept=".txt,text/plain">
-      </label>
-      <button type="button" class="btn-insert" id="btnSaveDraft">Salvar rascunho</button>
-      <button type="button" class="btn-insert" id="btnClear">Limpar</button>
+  <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-name">Morfo</span>
+      <span class="sidebar-logo-tag">by TanIA</span>
     </div>
 
-    <div class="editor-container">
-      <div class="editor-lines" id="editorLines">1</div>
-      <textarea class="editor-textarea" id="editorTextarea" placeholder="Cole ou digite o conteúdo BQ. Cada linha = um parágrafo. Use #Questão, #Resposta, #Justificativa e #Final." spellcheck="false"></textarea>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+
+      <a href="index.html" class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        Conversor
+      </a>
+
+      <a href="editor.html" class="sidebar-item active">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12.5V14h1.5l8-8L10 4.5l-8 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M11.5 3l1.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Editor BQ
+      </a>
+
+      <span class="sidebar-section-label">Recursos</span>
+
+      <a href="https://docs.moodle.org/en/Moodle_XML_format" target="_blank" rel="noopener" class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M9 2h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 2L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Moodle XML
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="version-badge">v1.2.2</span>
+      <div class="theme-toggle">
+        <span id="themeLabel">Claro</span>
+        <label>
+          <input type="checkbox" id="themeToggle" aria-label="Alternar tema">
+          <span class="theme-switch"></span>
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO PRINCIPAL ─────────────────────────────────── -->
+  <div class="main-wrapper">
+
+    <!-- Topbar do editor (dentro do main) -->
+    <div class="editor-topbar">
+      <div class="editor-topbar-left">
+        <span style="font-weight:800;font-size:.95rem;letter-spacing:-.02em;color:var(--text)">Editor BQ</span>
+        <span style="color:var(--border-strong)">·</span>
+        <span style="font-size:.8rem;color:var(--muted)">Escreva ou cole o texto com marcadores BQ</span>
+      </div>
+      <button class="guide-toggle" id="guideToggle">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 6v4M7 4.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Guia <span id="guideArrow">▼</span>
+      </button>
     </div>
 
-    <div class="editor-actions">
-      <button type="button" class="btn" id="btnConvert">Converter para XML</button>
-      <button type="button" class="btn modal-close" id="btnExportTxt">Exportar .txt</button>
+    <!-- Guia colapsável -->
+    <div class="guide-panel" id="guidePanel">
+      <div class="guide-grid">
+
+        <div class="guide-item">
+          <span class="guide-num">01</span>
+          <h3 class="guide-title">O formato</h3>
+          <p class="guide-desc">Texto simples com marcadores. Cada questão é um bloco com enunciado, respostas e justificativa opcional.</p>
+        </div>
+
+        <div class="guide-item">
+          <span class="guide-num">02</span>
+          <h3 class="guide-title">As marcações</h3>
+          <ul class="tag-list">
+            <li><code class="tag-code">#Questão</code> <span class="tag-desc">inicia o enunciado</span></li>
+            <li><code class="tag-code">#Resposta</code> <span class="tag-desc">1ª = correta · demais = erradas</span></li>
+            <li><code class="tag-code">#Justificativa</code> <span class="tag-desc">explicação (opcional)</span></li>
+            <li><code class="tag-code">#Final</code> <span class="tag-desc">encerra o banco</span></li>
+          </ul>
+        </div>
+
+        <div class="guide-item">
+          <span class="guide-num">03</span>
+          <h3 class="guide-title">Regras</h3>
+          <ul class="guide-rules">
+            <li>A 1ª <code>#Resposta</code> após <code>#Questão</code> é sempre a correta</li>
+            <li>Até 5 alternativas erradas por questão</li>
+            <li><code>#Justificativa</code> é opcional</li>
+            <li>O banco termina com <code>#Final</code></li>
+            <li>Cada marcador ocupa uma linha própria</li>
+          </ul>
+        </div>
+
+        <div class="guide-item">
+          <span class="guide-num">04</span>
+          <h3 class="guide-title">Exemplo</h3>
+          <pre class="code-block">#Questão
+Capital do Brasil?
+
+#Resposta
+Brasília.
+
+#Resposta
+São Paulo.
+#Resposta
+Rio de Janeiro.
+#Justificativa
+Capital federal desde 1960.
+
+#Final</pre>
+        </div>
+
+      </div>
     </div>
 
-    <div class="msg hide" id="msg"></div>
+    <!-- Editor principal -->
+    <div class="editor-wrap">
+
+      <div class="editor-toolbar">
+        <button type="button" class="btn-insert" data-insert="#Questão">#Questão</button>
+        <button type="button" class="btn-insert" data-insert="#Resposta">#Resposta</button>
+        <button type="button" class="btn-insert" data-insert="#Justificativa">#Justificativa</button>
+        <button type="button" class="btn-insert" data-insert="#Final">#Final</button>
+        <button type="button" class="btn-insert primary" id="btnInsertTemplate">Usar modelo</button>
+        <label class="file-label">
+          Carregar .txt
+          <input type="file" id="fileLoadTxt" accept=".txt,text/plain">
+        </label>
+        <button type="button" class="btn-insert" id="btnSaveDraft">Salvar rascunho</button>
+        <button type="button" class="btn-insert" id="btnClear">Limpar</button>
+      </div>
+
+      <div class="editor-container">
+        <div class="editor-lines" id="editorLines">1</div>
+        <textarea class="editor-textarea" id="editorTextarea" placeholder="Cole ou escreva as questões aqui. Use os botões acima para inserir marcadores, ou clique em Usar modelo para começar com um exemplo pronto." spellcheck="false"></textarea>
+      </div>
+
+      <div class="editor-actions">
+        <button type="button" class="btn btn-primary" id="btnConvert">Converter para XML</button>
+        <button type="button" class="btn modal-close" id="btnExportTxt">Exportar .txt</button>
+      </div>
+
+      <div class="msg hide" id="msg"></div>
+
+    </div>
+
   </div>
 
+  <!-- Modal: revisão de questões -->
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-labelledby="modalTitle">
       <div class="modal-header">
@@ -61,7 +180,7 @@
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-footer">
         <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
-        <button type="button" class="btn" id="btnExportXml">Exportar XML</button>
+        <button type="button" class="btn btn-primary" id="btnExportXml">Exportar XML</button>
       </div>
     </div>
   </div>
@@ -84,14 +203,14 @@
     function getPreferredTheme() {
       const saved = localStorage.getItem(THEME_KEY);
       if (saved === 'light' || saved === 'dark') return saved;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-      return 'dark';
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+      return 'light';
     }
     function applyTheme(theme) {
-      if (theme === 'light') root.setAttribute('data-theme', 'light');
+      if (theme === 'dark') root.setAttribute('data-theme', 'dark');
       else root.removeAttribute('data-theme');
-      themeToggle.checked = theme === 'light';
-      themeLabel.textContent = theme === 'light' ? 'Claro' : 'Escuro';
+      themeToggle.checked = theme === 'dark';
+      themeLabel.textContent = theme === 'dark' ? 'Escuro' : 'Claro';
       localStorage.setItem(THEME_KEY, theme);
     }
 
@@ -170,6 +289,7 @@
         updateLineNumbers();
       });
     });
+
     document.getElementById('btnInsertTemplate').addEventListener('click', function () {
       editorTextarea.value = BQ_TEMPLATE;
       updateLineNumbers();
@@ -188,6 +308,7 @@
       r.readAsText(f, 'UTF-8');
       e.target.value = '';
     });
+
     document.getElementById('btnSaveDraft').addEventListener('click', function () {
       try {
         localStorage.setItem(DRAFT_KEY, editorTextarea.value);
@@ -196,6 +317,7 @@
         showMsg('Erro ao salvar rascunho.', 'error');
       }
     });
+
     document.getElementById('btnClear').addEventListener('click', function () {
       editorTextarea.value = '';
       updateLineNumbers();
@@ -302,7 +424,7 @@
           '<textarea class="edit-justification" rows="3">' + escapeHtml((q.justification != null ? String(q.justification) : '').trim()) + '</textarea>' +
           '<div class="edit-actions">' +
             '<button type="button" class="btn modal-close btn-cancel-edit">Cancelar</button>' +
-            '<button type="button" class="btn btn-save-edit">Salvar</button>' +
+            '<button type="button" class="btn btn-primary btn-save-edit">Salvar</button>' +
           '</div>' +
         '</div>';
       var content = block.querySelector('.modal-question-content');
@@ -335,6 +457,7 @@
         });
       }
     }
+
     function setAllChecks(checked) {
       modalBody.querySelectorAll('.modal-question-check').forEach(function (cb) { cb.checked = checked; });
     }
@@ -349,7 +472,7 @@
     }
 
     applyTheme(getPreferredTheme());
-    themeToggle.addEventListener('change', function () { applyTheme(themeToggle.checked ? 'light' : 'dark'); });
+    themeToggle.addEventListener('change', function () { applyTheme(themeToggle.checked ? 'dark' : 'light'); });
 
     document.getElementById('btnConvert').addEventListener('click', function () {
       var text = editorTextarea.value;
@@ -400,6 +523,26 @@
       updateLineNumbers();
     }
     updateLineNumbers();
+
+    // Guide panel toggle
+    const guidePanel = document.getElementById('guidePanel');
+    const guideToggle = document.getElementById('guideToggle');
+    const guideArrow = document.getElementById('guideArrow');
+    const GUIDE_KEY = 'bq-guide-visible';
+
+    function setGuideVisible(visible) {
+      guidePanel.classList.toggle('open', visible);
+      guideToggle.classList.toggle('active', visible);
+      guideArrow.textContent = visible ? '▲' : '▼';
+      localStorage.setItem(GUIDE_KEY, visible ? '1' : '0');
+    }
+
+    guideToggle.addEventListener('click', () => {
+      setGuideVisible(!guidePanel.classList.contains('open'));
+    });
+
+    const savedGuide = localStorage.getItem(GUIDE_KEY);
+    setGuideVisible(savedGuide !== '0');
   </script>
 </body>
 </html>

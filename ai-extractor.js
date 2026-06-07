@@ -113,7 +113,7 @@ Analise a imagem e extraia TODAS as questões encontradas.
 Para cada questão, identifique:
 - O enunciado completo (pergunta ou problema)
 - A resposta correta
-- As alternativas erradas (até 4; se houver menos, inclua as que existirem)
+- As alternativas erradas (até 5; se houver menos, inclua as que existirem)
 - A justificativa ou gabarito explicativo (string vazia se não houver)
 
 Se a imagem contiver gabarito separado das questões, associe as respostas corretas às questões correspondentes.
@@ -254,11 +254,22 @@ AIExtractor.extractQuestionsFromImage = async function (file, config) {
 
 // ── Prompt e provedores ───────────────────────────────────────────────────────
 
-AIExtractor._buildPrompt = function (text) {
+AIExtractor._LANGUAGE_NAMES = {
+  'pt-BR': 'Português do Brasil',
+  'en': 'Inglês',
+  'es': 'Espanhol'
+};
+
+AIExtractor._buildPrompt = function (text, language) {
   const MAX_CHARS = 80000;
   const body = text.length > MAX_CHARS
     ? text.slice(0, MAX_CHARS) + '\n\n[TEXTO TRUNCADO — arquivo muito grande]'
     : text;
+
+  const langName = language ? AIExtractor._LANGUAGE_NAMES[language] : null;
+  const langInstruction = langName
+    ? `\nGere todo o conteúdo das questões (enunciado, respostas e justificativa) em ${langName}.\n`
+    : '';
 
   return `Você é um assistente especializado em extrair questões de provas e concursos.
 
@@ -270,7 +281,7 @@ Para cada questão, identifique:
 - A justificativa ou gabarito explicativo (string vazia se não houver)
 
 Se o arquivo contiver gabarito separado das questões (ex: "1-A, 2-C, 3-B"), associe as respostas corretas às questões correspondentes.
-
+${langInstruction}
 Retorne APENAS um array JSON válido no formato abaixo, sem texto adicional antes ou depois:
 [
   {
@@ -392,7 +403,7 @@ AIExtractor.extractQuestions = async function (text, config, images) {
   if (!config.apiKey)  throw new Error('Chave de API não configurada. Clique em ⚙ Configurações de IA.');
   if (!config.provider) throw new Error('Provedor de IA não selecionado.');
 
-  const prompt = AIExtractor._buildPrompt(text);
+  const prompt = AIExtractor._buildPrompt(text, config && config.language);
   let raw;
   switch (config.provider) {
     case 'claude':      raw = await AIExtractor._callClaude(prompt, config, images);      break;

@@ -1,143 +1,412 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <title>Conversor BQ DOCX → XML (Moodle)</title>
+  <title>Morfo — Questões para o Moodle · TanIA</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="page-index">
-  <main>
-    <div class="theme-toggle">
-      <span id="themeLabel">Escuro</span>
-      <label>
-        <input type="checkbox" id="themeToggle" aria-label="Alternar tema claro/escuro">
-        <span class="theme-switch"></span>
-      </label>
-    </div>
-    <div class="app-icon">📋</div>
-    <h1>Conversor BQ → XML (Moodle)</h1>
 
-    <div class="mode-toggle">
-      <button type="button" class="mode-btn active" id="modeBqBtn">BQ Clássico</button>
-      <button type="button" class="mode-btn" id="modeAiBtn">✨ Modo IA</button>
+  <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-name">Morfo</span>
+      <span class="sidebar-logo-tag">by TanIA</span>
     </div>
 
-    <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
 
-    <div id="aiSettingsContainer" style="display:none">
-      <div class="ai-settings-toggle" id="aiSettingsToggle">
-        <span>⚙ Configurações de IA</span>
-        <span id="aiSettingsArrow">▼</span>
+      <a href="index.html" class="sidebar-item active">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+          <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        Conversor
+      </a>
+
+      <a href="editor.html" class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12.5V14h1.5l8-8L10 4.5l-8 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M11.5 3l1.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Editor BQ
+      </a>
+
+      <span class="sidebar-section-label">Recursos</span>
+
+      <a href="https://docs.moodle.org/en/Moodle_XML_format" target="_blank" rel="noopener" class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M9 2h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 2L8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Moodle XML
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="version-badge">v1.2.2</span>
+      <div class="theme-toggle">
+        <span id="themeLabel">Claro</span>
+        <label>
+          <input type="checkbox" id="themeToggle" aria-label="Alternar tema claro/escuro">
+          <span class="theme-switch"></span>
+        </label>
       </div>
-      <div class="ai-settings-panel" id="aiSettingsPanel">
-        <div class="ai-settings-row">
-          <select id="aiProviderSelect">
-            <option value="">Provedor…</option>
-            <option value="claude">Claude (Anthropic)</option>
-            <option value="openai">OpenAI</option>
-            <option value="openrouter">OpenRouter</option>
-            <option value="gemini">Gemini (Google)</option>
-          </select>
-          <input type="text" id="aiModelInput" placeholder="Modelo (opcional)"
-            title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | openai/gpt-4o-mini | gemini-1.5-flash">
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO PRINCIPAL ─────────────────────────────────── -->
+  <div class="main-wrapper">
+    <div class="main-content">
+
+      <!-- Cabeçalho -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <span class="header-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+              <rect x="4" y="2" width="18" height="22" rx="2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M8 8h10M8 13h10M8 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <h1>Questões para o Moodle</h1>
+            <p class="sub" id="modeDescription">Envie um arquivo .docx no formato BQ e exporte o XML para importar no Moodle.</p>
+          </div>
         </div>
-        <div class="ai-settings-row">
-          <input type="password" id="aiKeyInput" placeholder="API Key">
-          <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
-          <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
+
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot"></span>
+          <span class="status-badge-text">
+            <span class="status-badge-title">Pronto para converter</span>
+            <span class="status-badge-sub" id="statusBadgeSub">Formato BQ · .docx</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Grid dashboard: 6 cards -->
+      <div class="converter-grid">
+
+        <!-- Card 1 — Modo de conversão -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">1. Modo de conversão</p>
+            <p class="card-subtitle">Escolha como enviar as questões</p>
+          </div>
+          <div class="mode-cards" role="group" aria-label="Modo de conversão">
+
+            <button type="button" class="mode-card active" id="modeBqBtn">
+              <span class="mode-card-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="1" width="12" height="14" rx="1" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="mode-card-body">
+                <span class="mode-card-label">Arquivo padrão</span>
+                <span class="mode-card-hint">Formato BQ · .docx</span>
+              </span>
+              <span class="mode-card-radio" aria-hidden="true"></span>
+            </button>
+
+            <button type="button" class="mode-card" id="modeAiBtn">
+              <span class="mode-card-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 1l1.6 3.9 4.2.04-3.4 2.72 1.24 4.1L8 9.6l-3.64 2.16 1.24-4.1L2.2 4.94l4.2-.04L8 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="mode-card-body">
+                <span class="mode-card-label">Inteligência Artificial</span>
+                <span class="mode-card-hint">Qualquer arquivo ou imagem</span>
+              </span>
+              <span class="mode-card-radio" aria-hidden="true"></span>
+            </button>
+
+            <button type="button" class="mode-card" id="modePasteBtn">
+              <span class="mode-card-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1" y="3" width="10" height="12" rx="1" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M4 3V2a1 1 0 011-1h4a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  <path d="M3.5 7.5h7M3.5 10h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="mode-card-body">
+                <span class="mode-card-label">Colar texto</span>
+                <span class="mode-card-hint">Cole ou digite as questões</span>
+              </span>
+              <span class="mode-card-radio" aria-hidden="true"></span>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Card 2 — Envie seu arquivo -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">2. Envie seu arquivo</p>
+            <p class="card-subtitle" id="card2Subtitle">Arraste e solte o arquivo aqui ou clique para selecionar</p>
+          </div>
+          <div class="card-body">
+            <div id="uploadForm">
+              <div class="drop-zone" id="dropZone" title="Clique ou arraste arquivos .docx">
+                <input type="file" id="fileInput" accept=".docx" multiple>
+                <div class="drop-zone-inner">
+                  <div class="drop-icon" aria-hidden="true">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                      <path d="M20 6v24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M12 14L20 6l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M6 32v2a2 2 0 002 2h24a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <p class="drop-label" id="dropLabel">Arraste e solte o arquivo aqui</p>
+                  <p class="drop-hint" id="dropHint">ou <span class="drop-click">clique para selecionar</span></p>
+                </div>
+                <ul class="file-list" id="fileList"></ul>
+              </div>
+
+              <div id="pasteArea" style="display:none">
+                <textarea id="pasteInput" class="paste-textarea" placeholder="Cole ou digite as questões aqui…" rows="10" spellcheck="false"></textarea>
+              </div>
+
+              <button type="button" class="btn btn-primary" id="btnConvert" disabled>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 1l1.4 3.4L12.8 6 9.4 7.4 8 11 6.6 7.4 3.2 6l3.4-1.6L8 1z" fill="currentColor"/>
+                  <path d="M13 10l.7 1.7L15.4 12l-1.7.7L13 14l-.7-1.7L10.6 12l1.7-.3L13 10z" fill="currentColor"/>
+                </svg>
+                <span id="btnConvertLabel">Converter para XML</span>
+              </button>
+
+              <div class="msg hide" id="msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 — Formatos suportados -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">3. Formatos suportados</p>
+            <p class="card-subtitle">Enviamos e processamos com excelência</p>
+          </div>
+          <div class="card-body">
+            <div class="format-list">
+              <div class="format-item"><span class="format-icon fmt-doc">DOC</span><span class="format-label">DOCX</span></div>
+              <div class="format-item"><span class="format-icon fmt-pdf">PDF</span><span class="format-label">PDF</span></div>
+              <div class="format-item"><span class="format-icon fmt-txt">TXT</span><span class="format-label">TXT</span></div>
+              <div class="format-item"><span class="format-icon fmt-csv">CSV</span><span class="format-label">CSV</span></div>
+              <div class="format-item"><span class="format-icon fmt-xls">XLS</span><span class="format-label">XLSX</span></div>
+              <div class="format-item"><span class="format-icon fmt-xls">XLS</span><span class="format-label">XLS</span></div>
+              <div class="format-item"><span class="format-icon fmt-img">JPG</span><span class="format-label">JPG</span></div>
+              <div class="format-item"><span class="format-icon fmt-img">PNG</span><span class="format-label">PNG</span></div>
+              <div class="format-item"><span class="format-icon fmt-img">WEB</span><span class="format-label">WEBP</span></div>
+              <div class="format-item"><span class="format-icon fmt-gif">GIF</span><span class="format-label">GIF</span></div>
+              <div class="format-item"><span class="format-icon fmt-bmp">BMP</span><span class="format-label">BMP</span></div>
+            </div>
+            <p class="format-note">Arquivos até 100MB por upload</p>
+          </div>
+        </div>
+
+        <!-- Card 4 — Configurações de IA -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">4. Configurações de IA</p>
+            <p class="card-subtitle">Ajuste como a IA deve processar suas questões</p>
+          </div>
+          <div class="card-body">
+
+            <div class="ai-toggle-row">
+              <span class="ai-toggle-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.6 3.9 4.2.04-3.4 2.72 1.24 4.1L8 9.6l-3.64 2.16 1.24-4.1L2.2 4.94l4.2-.04L8 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="ai-toggle-body">
+                <span class="ai-toggle-label">IA ativa</span>
+                <span class="ai-toggle-desc">Usar inteligência artificial para extrair questões</span>
+              </span>
+              <label class="switch"><input type="checkbox" id="aiActiveToggle" checked><span class="switch-track"></span></label>
+            </div>
+
+            <div class="ai-toggle-row">
+              <span class="ai-toggle-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/></svg>
+              </span>
+              <span class="ai-toggle-body">
+                <span class="ai-toggle-label">OCR habilitado</span>
+                <span class="ai-toggle-desc">Reconhecer texto em imagens e PDFs</span>
+              </span>
+              <label class="switch"><input type="checkbox" id="ocrToggle" checked><span class="switch-track"></span></label>
+            </div>
+
+            <div class="ai-toggle-row">
+              <span class="ai-toggle-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </span>
+              <span class="ai-toggle-body">
+                <span class="ai-toggle-label">Identificar alternativas</span>
+                <span class="ai-toggle-desc">Detectar alternativas automaticamente</span>
+              </span>
+              <label class="switch"><input type="checkbox" id="altToggle" checked><span class="switch-track"></span></label>
+            </div>
+
+            <div class="ai-toggle-row">
+              <span class="ai-toggle-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.3" stroke="currentColor" stroke-width="1.4"/><path d="M1.7 8h12.6M8 1.7c1.7 1.7 2.6 3.9 2.6 6.3S9.7 12.6 8 14.3C6.3 12.6 5.4 10.4 5.4 8S6.3 3.4 8 1.7z" stroke="currentColor" stroke-width="1.4"/></svg>
+              </span>
+              <span class="ai-toggle-body">
+                <span class="ai-toggle-label">Idioma das questões</span>
+                <span class="ai-toggle-desc">Idioma de saída do conteúdo</span>
+              </span>
+              <select class="ai-lang-select" id="aiLangSelect" aria-label="Idioma das questões">
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en">Inglês</option>
+                <option value="es">Espanhol</option>
+              </select>
+            </div>
+
+            <div class="ai-divider"></div>
+
+            <div class="ai-settings-row">
+              <select id="aiProviderSelect">
+                <option value="">Serviço de IA…</option>
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openai">OpenAI</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="gemini">Gemini (Google)</option>
+              </select>
+              <input type="text" id="aiModelInput" placeholder="Modelo (opcional)"
+                title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | gemini-1.5-flash">
+            </div>
+            <div class="ai-settings-row">
+              <input type="password" id="aiKeyInput" placeholder="Chave de acesso (API Key)">
+              <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
+              <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
+            </div>
+
+            <div class="ai-info-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4M8 5.2v.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span>A IA será aplicada para estruturar e validar suas questões com maior precisão e organização.</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Card 5 — Resumo da última conversão -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">5. Resumo da última conversão</p>
+            <p class="card-subtitle">Visão rápida do que foi processado</p>
+          </div>
+          <div class="card-body">
+            <div class="summary-empty" id="summaryEmpty">
+              <span class="summary-empty-icon">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <path d="M5 11a2 2 0 012-2h8l3 3h12a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="summary-empty-title">Nenhuma conversão realizada ainda</span>
+              <span class="summary-empty-sub">Envie um arquivo e inicie sua primeira conversão.</span>
+            </div>
+            <div class="summary-stats">
+              <div class="stat-box">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1.5" y="1.5" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1.5" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="10" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+                <span class="stat-num" id="statQuestoes">0</span>
+                <span class="stat-label">Questões</span>
+              </div>
+              <div class="stat-box">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 4.5h12M3 9h12M3 13.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span class="stat-num" id="statAlternativas">0</span>
+                <span class="stat-label">Alternativas</span>
+              </div>
+              <div class="stat-box">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="6.5" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 13l4-3.5 3 2.5 2.5-2L16 13" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                <span class="stat-num" id="statImagens">0</span>
+                <span class="stat-label">Imagens</span>
+              </div>
+              <div class="stat-box">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 1.5h6l4 4V15a1.5 1.5 0 01-1.5 1.5h-8A1.5 1.5 0 013 15V3a1.5 1.5 0 011-1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 1.5V6h4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                <span class="stat-num" id="statArquivos">0</span>
+                <span class="stat-label">Arquivos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6 — Dicas rápidas -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">6. Dicas rápidas</p>
+            <p class="card-subtitle">Boas práticas para melhores resultados</p>
+          </div>
+          <div class="card-body">
+            <div class="tips-list">
+              <div class="tip-item">
+                <span class="tip-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5l1.6 3.4 3.7.4-2.8 2.5.8 3.7-3.3-1.9-3.3 1.9.8-3.7L2 5.3l3.7-.4 1.8-3.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+                <span class="tip-body">
+                  <span class="tip-title">Use arquivos com boa qualidade</span>
+                  <span class="tip-desc">Documentos e imagens nítidas geram melhores resultados.</span>
+                </span>
+              </div>
+              <div class="tip-item">
+                <span class="tip-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 8l3 3 6-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="tip-body">
+                  <span class="tip-title">Revise após a conversão</span>
+                  <span class="tip-desc">Sempre valide as questões no Moodle após importar.</span>
+                </span>
+              </div>
+              <div class="tip-item">
+                <span class="tip-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="1.5" width="11" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 5h6M4.5 7.5h6M4.5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+                <span class="tip-body">
+                  <span class="tip-title">Formatos recomendados</span>
+                  <span class="tip-desc">DOCX, PDF e XLSX oferecem melhor precisão na extração.</span>
+                </span>
+              </div>
+            </div>
+            <a href="https://docs.moodle.org/en/Moodle_XML_format" target="_blank" rel="noopener" class="doc-link">
+              Ver documentação
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2H2.5A.5.5 0 002 2.5v9a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M8 2h4v4M12 2L6.5 7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal de revisão (central, sobreposto) -->
+    <div class="review-panel" id="modalOverlay" aria-hidden="true">
+      <div class="modal" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <h2 id="modalTitle">Revisar questões</h2>
+        </div>
+        <div class="modal-actions-top">
+          <div class="actions-left">
+            <button type="button" id="btnSelectAll">Selecionar todas</button>
+            <button type="button" id="btnDeselectAll">Desmarcar todas</button>
+            <span class="sel-count" id="selCount"></span>
+          </div>
+          <input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões…">
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+          <div class="footer-left">
+            <input type="text" id="categoryInput" class="category-input" placeholder="Categoria Moodle (opcional)">
+          </div>
+          <div class="footer-right">
+            <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
+            <button type="button" class="btn btn-primary" id="btnExportXml">Exportar XML</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="drop-zone" id="dropZone" title="Clique ou arraste arquivos .docx">
-      <input type="file" id="fileInput" accept=".docx" multiple>
-      <div class="label">Clique ou arraste arquivos .docx aqui</div>
-      <ul class="file-list" id="fileList"></ul>
-    </div>
-
-    <button type="button" class="btn" id="btnConvert" disabled>Converter para XML</button>
-
-    <div class="msg hide" id="msg"></div>
-  </main>
-
-  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-labelledby="modalTitle">
-      <div class="modal-header">
-        <h2 id="modalTitle">Revise as questões antes de exportar</h2>
-      </div>
-      <div class="modal-actions-top">
-        <div class="actions-left">
-          <button type="button" id="btnSelectAll">Selecionar todas</button>
-          <button type="button" id="btnDeselectAll">Desmarcar todas</button>
-          <span class="sel-count" id="selCount"></span>
-        </div>
-        <input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões...">
-      </div>
-      <div class="modal-body" id="modalBody">
-        <!-- questões renderizadas aqui -->
-      </div>
-      <div class="modal-footer">
-        <div class="footer-left">
-          <input type="text" id="categoryInput" class="category-input" placeholder="Categoria Moodle (opcional)">
-        </div>
-        <div class="footer-right">
-          <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
-          <button type="button" class="btn" id="btnExportXml">Exportar XML</button>
-        </div>
-      </div>
-    </div>
   </div>
 
+  <!-- Spinner -->
   <div class="spinner-overlay" id="spinnerOverlay">
     <div class="spinner"></div>
-    <div class="spinner-label" id="spinnerLabel">Convertendo...</div>
+    <div class="spinner-label" id="spinnerLabel">Convertendo…</div>
   </div>
-
-  <footer>Feito com Carinho 💚 por Gerencia de Qualidade - UNICIVE &nbsp;·&nbsp; v1.2.2</footer>
 
   <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] } };</script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -155,22 +424,27 @@
     function getPreferredTheme() {
       const saved = localStorage.getItem(THEME_KEY);
       if (saved === 'light' || saved === 'dark') return saved;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-      return 'dark';
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+      return 'light'; // padrão: claro
     }
     function applyTheme(theme) {
-      root[theme === 'light' ? 'setAttribute' : 'removeAttribute']('data-theme', 'light');
-      themeToggle.checked = theme === 'light';
-      themeLabel.textContent = theme === 'light' ? 'Claro' : 'Escuro';
+      if (theme === 'dark') root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+      themeToggle.checked = theme === 'dark';
+      themeLabel.textContent = theme === 'dark' ? 'Escuro' : 'Claro';
       localStorage.setItem(THEME_KEY, theme);
     }
     applyTheme(getPreferredTheme());
-    themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'light' : 'dark'));
+    themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'dark' : 'light'));
 
     const dropZone      = document.getElementById('dropZone');
     const fileInput     = document.getElementById('fileInput');
     const fileListEl    = document.getElementById('fileList');
+    const dropLabel     = document.getElementById('dropLabel');
+    const dropHint      = document.getElementById('dropHint');
+    const card2Subtitle = document.getElementById('card2Subtitle');
     const btnConvert    = document.getElementById('btnConvert');
+    const btnConvertLabel = document.getElementById('btnConvertLabel');
     const msg           = document.getElementById('msg');
     const modalOverlay  = document.getElementById('modalOverlay');
     const modalBody     = document.getElementById('modalBody');
@@ -184,27 +458,71 @@
     const spinnerOverlay= document.getElementById('spinnerOverlay');
     const spinnerLabel  = document.getElementById('spinnerLabel');
 
+    const statusBadgeSub = document.getElementById('statusBadgeSub');
+    const statQuestoes     = document.getElementById('statQuestoes');
+    const statAlternativas = document.getElementById('statAlternativas');
+    const statImagens      = document.getElementById('statImagens');
+    const statArquivos     = document.getElementById('statArquivos');
+    const summaryEmpty     = document.getElementById('summaryEmpty');
+
     let currentBanco = null;
     let currentBaseFileName = 'banco-questoes';
     let currentFiles = [];
-
-    // Modo de operação: 'bq' (parser clássico) | 'ai' (extração por IA)
     let currentMode = 'bq';
 
-    const modeBqBtn           = document.getElementById('modeBqBtn');
-    const modeAiBtn           = document.getElementById('modeAiBtn');
-    const modeDescription     = document.getElementById('modeDescription');
-    const aiSettingsContainer = document.getElementById('aiSettingsContainer');
-    const aiSettingsToggle    = document.getElementById('aiSettingsToggle');
-    const aiSettingsPanel     = document.getElementById('aiSettingsPanel');
-    const aiSettingsArrow     = document.getElementById('aiSettingsArrow');
-    const aiProviderSelect    = document.getElementById('aiProviderSelect');
-    const aiModelInput        = document.getElementById('aiModelInput');
-    const aiKeyInput          = document.getElementById('aiKeyInput');
-    const aiSaveBtn           = document.getElementById('aiSaveBtn');
-    const aiSavedBadge        = document.getElementById('aiSavedBadge');
+    const modeBqBtn        = document.getElementById('modeBqBtn');
+    const modeAiBtn        = document.getElementById('modeAiBtn');
+    const modePasteBtn     = document.getElementById('modePasteBtn');
+    const pasteArea        = document.getElementById('pasteArea');
+    const pasteInput       = document.getElementById('pasteInput');
+    const modeDescription  = document.getElementById('modeDescription');
+    const aiProviderSelect = document.getElementById('aiProviderSelect');
+    const aiModelInput     = document.getElementById('aiModelInput');
+    const aiKeyInput       = document.getElementById('aiKeyInput');
+    const aiSaveBtn        = document.getElementById('aiSaveBtn');
+    const aiSavedBadge     = document.getElementById('aiSavedBadge');
 
-    // ── Mensagens ──────────────────────────────────────────────────────────────
+    // Toggles de preferências (persistidos)
+    const aiActiveToggle = document.getElementById('aiActiveToggle');
+    const ocrToggle      = document.getElementById('ocrToggle');
+    const altToggle      = document.getElementById('altToggle');
+    const aiLangSelect   = document.getElementById('aiLangSelect');
+
+    const PREF = {
+      aiActive: 'bq-ai-active',
+      ocr:      'bq-ocr',
+      alt:      'bq-alt',
+      lang:     'bq-ai-lang'
+    };
+
+    function loadBool(key, def) {
+      const v = localStorage.getItem(key);
+      return v === null ? def : v === '1';
+    }
+    function initPrefs() {
+      aiActiveToggle.checked = loadBool(PREF.aiActive, true);
+      ocrToggle.checked      = loadBool(PREF.ocr, true);
+      altToggle.checked      = loadBool(PREF.alt, true);
+      const lang = localStorage.getItem(PREF.lang);
+      if (lang) aiLangSelect.value = lang;
+      updateStatusBadge();
+    }
+    aiActiveToggle.addEventListener('change', () => { localStorage.setItem(PREF.aiActive, aiActiveToggle.checked ? '1' : '0'); updateStatusBadge(); });
+    ocrToggle.addEventListener('change',      () => { localStorage.setItem(PREF.ocr, ocrToggle.checked ? '1' : '0'); updateStatusBadge(); });
+    altToggle.addEventListener('change',      () => { localStorage.setItem(PREF.alt, altToggle.checked ? '1' : '0'); });
+    aiLangSelect.addEventListener('change',   () => { localStorage.setItem(PREF.lang, aiLangSelect.value); });
+
+    function updateStatusBadge() {
+      if (currentMode === 'bq') {
+        statusBadgeSub.textContent = 'Formato BQ · .docx';
+        return;
+      }
+      const parts = [];
+      parts.push(aiActiveToggle.checked ? 'IA ativa' : 'IA desativada');
+      if (ocrToggle.checked) parts.push('OCR habilitado');
+      statusBadgeSub.textContent = parts.join(' • ');
+    }
+
     function showMsg(text, type) {
       msg.textContent = text;
       msg.className = 'msg ' + (type || '');
@@ -212,14 +530,12 @@
     }
     function hideMsg() { msg.classList.add('hide'); }
 
-    // ── Spinner ────────────────────────────────────────────────────────────────
     function showSpinner(label) {
-      spinnerLabel.textContent = label || 'Convertendo...';
+      spinnerLabel.textContent = label || 'Convertendo…';
       spinnerOverlay.classList.add('active');
     }
     function hideSpinner() { spinnerOverlay.classList.remove('active'); }
 
-    // ── Modo BQ / IA ──────────────────────────────────────────────────────────
     const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.gif,.bmp';
     const BQ_ACCEPT = '.docx';
 
@@ -227,25 +543,57 @@
       currentMode = mode;
       modeBqBtn.classList.toggle('active', mode === 'bq');
       modeAiBtn.classList.toggle('active', mode === 'ai');
-      aiSettingsContainer.style.display = mode === 'ai' ? '' : 'none';
+      modePasteBtn.classList.toggle('active', mode === 'paste');
       fileInput.accept = mode === 'ai' ? AI_ACCEPT : BQ_ACCEPT;
-      modeDescription.textContent = mode === 'ai'
-        ? 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.'
-        : 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.';
+
+      // Fade description
+      modeDescription.style.opacity = '0';
+      setTimeout(() => {
+        if (mode === 'ai') {
+          modeDescription.textContent = 'Envie qualquer arquivo — DOCX, PDF, imagem, planilha ou texto puro. A IA identifica, organiza e extrai as questões automaticamente.';
+        } else if (mode === 'paste') {
+          modeDescription.textContent = 'Cole ou digite o texto com as questões. A IA interpreta e extrai as questões automaticamente, pronto para exportar no Moodle.';
+        } else {
+          modeDescription.textContent = 'Envie um arquivo .docx estruturado com marcadores BQ. O conversor gera o XML pronto para importar no Moodle.';
+        }
+        modeDescription.style.opacity = '1';
+      }, 140);
+
+      // Drop zone / paste area
+      const isPaste = mode === 'paste';
+      dropZone.style.display = isPaste ? 'none' : '';
+      pasteArea.style.display = isPaste ? '' : 'none';
+
+      if (isPaste) {
+        card2Subtitle.textContent = 'Cole ou digite o texto com as questões';
+      } else if (mode === 'ai') {
+        card2Subtitle.textContent = 'Arraste e solte o arquivo aqui ou clique para selecionar';
+        if (dropLabel) dropLabel.textContent = 'Arraste e solte o arquivo aqui';
+        if (dropHint) dropHint.innerHTML = 'DOCX · PDF · Imagem · TXT · CSV · XLSX';
+      } else {
+        card2Subtitle.textContent = 'Arraste e solte o arquivo aqui ou clique para selecionar';
+        if (dropLabel) dropLabel.textContent = 'Arraste e solte o arquivo aqui';
+        if (dropHint) dropHint.innerHTML = 'ou <span class="drop-click">clique para selecionar</span>';
+      }
+
       currentFiles = [];
       fileListEl.innerHTML = '';
+      dropZone.classList.remove('has-files');
+      if (isPaste) pasteInput.value = '';
       btnConvert.disabled = true;
-      btnConvert.textContent = 'Converter para XML';
+      btnConvertLabel.textContent = 'Converter para XML';
       hideMsg();
+      updateStatusBadge();
     }
 
     modeBqBtn.addEventListener('click', () => switchMode('bq'));
     modeAiBtn.addEventListener('click', () => switchMode('ai'));
+    modePasteBtn.addEventListener('click', () => switchMode('paste'));
 
-    // ── Painel de config ──────────────────────────────────────────────────────
-    aiSettingsToggle.addEventListener('click', () => {
-      const open = aiSettingsPanel.classList.toggle('open');
-      aiSettingsArrow.textContent = open ? '▲' : '▼';
+    pasteInput.addEventListener('input', () => {
+      const hasText = pasteInput.value.trim().length > 0;
+      btnConvert.disabled = !hasText;
+      btnConvertLabel.textContent = hasText ? 'Analisar com IA para XML' : 'Converter para XML';
     });
 
     function loadAiConfig() {
@@ -267,9 +615,15 @@
       setTimeout(() => { aiSavedBadge.style.display = 'none'; }, 2000);
     });
 
+    function aiConfigWithLang() {
+      const cfg = AIExtractor.loadConfig();
+      cfg.language = aiLangSelect.value;
+      return cfg;
+    }
+
+    initPrefs();
     loadAiConfig();
 
-    // ── Seleção de arquivos ────────────────────────────────────────────────────
     function setFiles(fileList) {
       const AI_EXTS = ['.docx', '.pdf', '.txt', '.csv', '.xlsx', '.xls', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
       const files = Array.from(fileList).filter(f => {
@@ -285,16 +639,16 @@
         return;
       }
       currentFiles = files;
-      fileListEl.innerHTML = files.map(f => `<li>📄 ${escapeHtml(f.name)}</li>`).join('');
+      fileListEl.innerHTML = files.map(f => `<li>· ${escapeHtml(f.name)}</li>`).join('');
+      dropZone.classList.add('has-files');
       const action = currentMode === 'ai' ? 'Analisar com IA' : 'Converter';
-      btnConvert.textContent = files.length === 1
+      btnConvertLabel.textContent = files.length === 1
         ? `${action} para XML`
         : `${action} ${files.length} arquivos para XML`;
       btnConvert.disabled = false;
       hideMsg();
     }
 
-    // ── Modal ──────────────────────────────────────────────────────────────────
     function openModal() {
       modalOverlay.classList.add('open');
       modalOverlay.setAttribute('aria-hidden', 'false');
@@ -306,14 +660,12 @@
       currentBanco = null;
     }
 
-    // ── Contador de seleção ────────────────────────────────────────────────────
     function updateCounter() {
       const all     = modalBody.querySelectorAll('.modal-question-check').length;
       const checked = modalBody.querySelectorAll('.modal-question-check:checked').length;
-      selCount.textContent = checked + ' / ' + all + ' selecionadas';
+      selCount.textContent = checked + ' / ' + all;
     }
 
-    // ── Filtro de questões ─────────────────────────────────────────────────────
     function filterQuestions(term) {
       const t = term.toLowerCase().trim();
       modalBody.querySelectorAll('.modal-question').forEach(block => {
@@ -321,7 +673,6 @@
       });
     }
 
-    // ── Reordenação ────────────────────────────────────────────────────────────
     function moveQuestion(idx, dir) {
       const list = currentBanco.question_list;
       const newIdx = idx + dir;
@@ -330,7 +681,6 @@
       renderModalQuestions(currentBanco);
     }
 
-    // ── Validação ──────────────────────────────────────────────────────────────
     function getQuestionIssues(q) {
       const issues = [];
       const plainText = s => String(s || '').replace(/<[^>]+>/g, '').trim();
@@ -341,7 +691,6 @@
       return issues;
     }
 
-    // ── Render helper ──────────────────────────────────────────────────────────
     function renderRichHtml(s) {
       if (s == null) return '';
       return String(s).replace(/\n/g, '<br>');
@@ -352,7 +701,25 @@
       return div.innerHTML;
     }
 
-    // ── Renderizar questões ────────────────────────────────────────────────────
+    // Atualiza o card 5 (resumo) com base no banco convertido
+    function updateSummary(banco, fileCount) {
+      const list = (banco && banco.question_list) || [];
+      let alternativas = 0;
+      let imagens = 0;
+      list.forEach(q => {
+        const filledWrongs = (q.wrong_answer_list || []).filter(a => String(a || '').trim());
+        alternativas += filledWrongs.length + (String(q.correct_answer || '').trim() ? 1 : 0);
+        const blob = [q.question, q.correct_answer, ...(q.wrong_answer_list || []), q.justification].join(' ');
+        const m = String(blob).match(/<img\b/gi);
+        if (m) imagens += m.length;
+      });
+      statQuestoes.textContent     = String(list.length);
+      statAlternativas.textContent = String(alternativas);
+      statImagens.textContent      = String(imagens);
+      statArquivos.textContent     = String(fileCount || 0);
+      summaryEmpty.classList.add('hide');
+    }
+
     function renderModalQuestions(banco) {
       const list = banco.question_list || [];
       modalBody.innerHTML = '';
@@ -422,7 +789,6 @@
       }
     }
 
-    // ── Edição inline ──────────────────────────────────────────────────────────
     function openEditForm(block, index) {
       const q = currentBanco.question_list[index];
       const wrongList = q.wrong_answer_list || [];
@@ -445,7 +811,7 @@
           '<textarea class="edit-justification" rows="3">' + escapeHtml((q.justification != null ? String(q.justification) : '').trim()) + '</textarea>' +
           '<div class="edit-actions">' +
             '<button type="button" class="btn modal-close btn-cancel-edit">Cancelar</button>' +
-            '<button type="button" class="btn btn-save-edit">Salvar</button>' +
+            '<button type="button" class="btn btn-primary btn-save-edit">Salvar</button>' +
           '</div>' +
         '</div>';
       const content = block.querySelector('.modal-question-content');
@@ -469,10 +835,10 @@
         q.wrong_answer_list = Array.from(content.querySelectorAll('.edit-wrong')).map(ta => ta.value.trim()).filter(Boolean);
         q.justification = content.querySelector('.edit-justification').value.trim();
         renderModalQuestions(currentBanco);
+        updateSummary(currentBanco, currentFiles.length || 1);
       });
     }
 
-    // ── Seleção em massa ───────────────────────────────────────────────────────
     function setAllChecks(checked) {
       modalBody.querySelectorAll('.modal-question-check').forEach(cb => { cb.checked = checked; });
       updateCounter();
@@ -487,7 +853,6 @@
       return indexes.sort((a, b) => a - b);
     }
 
-    // ── Eventos de arquivo ─────────────────────────────────────────────────────
     dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -498,26 +863,59 @@
     });
     fileInput.addEventListener('change', () => { if (fileInput.files.length) setFiles(fileInput.files); });
 
-    // ── Converter ──────────────────────────────────────────────────────────────
     btnConvert.addEventListener('click', async () => {
-      if (!currentFiles.length) return;
-      btnConvert.disabled = true;
-      hideMsg();
-
-      if (currentMode === 'ai') {
-        // ── Modo IA ────────────────────────────────────────────────────────────
+      if (currentMode === 'paste') {
+        const text = pasteInput.value.trim();
+        if (!text) return;
+        btnConvert.disabled = true;
+        hideMsg();
         if (!window.AIExtractor) {
           showMsg('Erro: ai-extractor.js não carregou.', 'error');
           btnConvert.disabled = false;
           return;
         }
-        const config = AIExtractor.loadConfig();
+        const config = aiConfigWithLang();
         if (!config.apiKey || !config.provider) {
-          showMsg('Configure a chave de API e o provedor em ⚙ Configurações de IA.', 'error');
-          if (!aiSettingsPanel.classList.contains('open')) {
-            aiSettingsPanel.classList.add('open');
-            aiSettingsArrow.textContent = '▲';
+          showMsg('Configure a chave de acesso e o serviço de IA no card "Configurações de IA".', 'error');
+          btnConvert.disabled = false;
+          return;
+        }
+        showSpinner('Analisando texto com IA…');
+        try {
+          const questions = await AIExtractor.extractQuestions(text, config);
+          if (questions.length === 0) {
+            showMsg('A IA não encontrou questões no texto fornecido. Verifique o conteúdo e tente novamente.', 'error');
+          } else {
+            const banco = AIExtractor.toBancoDeQuestoes(questions);
+            currentBanco = banco;
+            currentBaseFileName = 'banco-questoes';
+            renderModalQuestions(banco);
+            updateSummary(banco, 1);
+            openModal();
           }
+        } catch (err) {
+          console.error(err);
+          showMsg('Erro: ' + (err.message || String(err)), 'error');
+        } finally {
+          hideSpinner();
+          btnConvert.disabled = false;
+        }
+        return;
+      }
+
+      if (!currentFiles.length) return;
+      btnConvert.disabled = true;
+      hideMsg();
+
+      if (currentMode === 'ai') {
+        if (!window.AIExtractor) {
+          showMsg('Erro: ai-extractor.js não carregou.', 'error');
+          btnConvert.disabled = false;
+          return;
+        }
+        const config = aiConfigWithLang();
+        if (!config.apiKey || !config.provider) {
+          showMsg('Configure a chave de acesso e o serviço de IA no card "Configurações de IA".', 'error');
           btnConvert.disabled = false;
           return;
         }
@@ -556,6 +954,7 @@
             currentBanco = banco;
             currentBaseFileName = currentFiles[0].name.replace(/\.[^.]+$/, '');
             renderModalQuestions(banco);
+            updateSummary(banco, currentFiles.length);
             openModal();
           }
         } catch (err) {
@@ -567,7 +966,6 @@
         }
 
       } else {
-        // ── Modo BQ Clássico ───────────────────────────────────────────────────
         if (!window.BQConverter || typeof window.BQConverter.convertDocxToBancoRich !== 'function') {
           showMsg('Erro: converter.js não carregou. Verifique se está na mesma pasta do index.html.', 'error');
           btnConvert.disabled = false;
@@ -592,6 +990,7 @@
           currentBanco = merged;
           currentBaseFileName = currentFiles[0].name.replace(/\.docx$/i, '');
           renderModalQuestions(merged);
+          updateSummary(merged, currentFiles.length);
           openModal();
         } catch (err) {
           console.error(err);
@@ -603,14 +1002,12 @@
       }
     });
 
-    // ── Ações do modal ─────────────────────────────────────────────────────────
     btnSelectAll.addEventListener('click', () => setAllChecks(true));
     btnDeselectAll.addEventListener('click', () => setAllChecks(false));
     btnModalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     searchInput.addEventListener('input', () => filterQuestions(searchInput.value));
 
-    // ── Exportar XML ───────────────────────────────────────────────────────────
     btnExportXml.addEventListener('click', () => {
       if (!currentBanco || !currentBanco.question_list) return;
       const indexes = getCheckedQuestions();
