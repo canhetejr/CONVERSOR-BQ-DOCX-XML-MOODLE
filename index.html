@@ -558,6 +558,7 @@
     <div class="mode-toggle">
       <button type="button" class="mode-btn active" id="modeBqBtn">BQ Clássico</button>
       <button type="button" class="mode-btn" id="modeAiBtn">✨ Modo IA</button>
+      <button type="button" class="mode-btn" id="modeXmlDocxBtn">XML → DOCX</button>
     </div>
 
     <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
@@ -583,6 +584,24 @@
           <input type="password" id="aiKeyInput" placeholder="API Key">
           <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
           <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="docxSettingsContainer" style="display:none">
+      <div class="ai-settings-toggle" style="cursor: default;">
+        <span>⚙ Opções do Documento DOCX</span>
+      </div>
+      <div class="ai-settings-panel open" id="docxSettingsPanel" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0 0;">
+        <div class="ai-settings-row" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="chkGabarito" checked style="width: 16px; height: 16px; accent-color: var(--accent);">
+            <span style="font-size: 0.85rem;">Incluir gabarito no final do documento</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="chkBoldCorrect" style="width: 16px; height: 16px; accent-color: var(--accent);">
+            <span style="font-size: 0.85rem;">Destacar resposta correta a <b>negrito</b> nas alternativas</span>
+          </label>
         </div>
       </div>
     </div>
@@ -638,6 +657,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js"></script>
   <script src="converter.js"></script>
   <script src="ai-extractor.js"></script>
   <script>
@@ -682,11 +702,12 @@
     let currentBaseFileName = 'banco-questoes';
     let currentFiles = [];
 
-    // Modo de operação: 'bq' (parser clássico) | 'ai' (extração por IA)
+    // Modo de operação: 'bq' (parser clássico) | 'ai' (extração por IA) | 'xmlDocx' (XML para DOCX)
     let currentMode = 'bq';
 
     const modeBqBtn           = document.getElementById('modeBqBtn');
     const modeAiBtn           = document.getElementById('modeAiBtn');
+    const modeXmlDocxBtn      = document.getElementById('modeXmlDocxBtn');
     const modeDescription     = document.getElementById('modeDescription');
     const aiSettingsContainer = document.getElementById('aiSettingsContainer');
     const aiSettingsToggle    = document.getElementById('aiSettingsToggle');
@@ -697,6 +718,10 @@
     const aiKeyInput          = document.getElementById('aiKeyInput');
     const aiSaveBtn           = document.getElementById('aiSaveBtn');
     const aiSavedBadge        = document.getElementById('aiSavedBadge');
+    
+    const docxSettingsContainer = document.getElementById('docxSettingsContainer');
+    const chkGabarito         = document.getElementById('chkGabarito');
+    const chkBoldCorrect      = document.getElementById('chkBoldCorrect');
 
     // ── Mensagens ──────────────────────────────────────────────────────────────
     function showMsg(text, type) {
@@ -716,25 +741,40 @@
     // ── Modo BQ / IA ──────────────────────────────────────────────────────────
     const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.gif,.bmp';
     const BQ_ACCEPT = '.docx';
+    const XML_ACCEPT = '.xml';
 
     function switchMode(mode) {
       currentMode = mode;
       modeBqBtn.classList.toggle('active', mode === 'bq');
       modeAiBtn.classList.toggle('active', mode === 'ai');
+      modeXmlDocxBtn.classList.toggle('active', mode === 'xmlDocx');
+      
       aiSettingsContainer.style.display = mode === 'ai' ? '' : 'none';
-      fileInput.accept = mode === 'ai' ? AI_ACCEPT : BQ_ACCEPT;
-      modeDescription.textContent = mode === 'ai'
-        ? 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.'
-        : 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.';
+      docxSettingsContainer.style.display = mode === 'xmlDocx' ? '' : 'none';
+      
+      if (mode === 'ai') {
+        fileInput.accept = AI_ACCEPT;
+        modeDescription.textContent = 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.';
+        btnConvert.textContent = 'Analisar com IA para XML';
+      } else if (mode === 'xmlDocx') {
+        fileInput.accept = XML_ACCEPT;
+        modeDescription.textContent = 'Envie um ou mais arquivos Moodle XML para convertê-los em documentos DOCX formatados.';
+        btnConvert.textContent = 'Gerar e Transferir DOCX';
+      } else {
+        fileInput.accept = BQ_ACCEPT;
+        modeDescription.textContent = 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.';
+        btnConvert.textContent = 'Converter para XML';
+      }
+      
       currentFiles = [];
       fileListEl.innerHTML = '';
       btnConvert.disabled = true;
-      btnConvert.textContent = 'Converter para XML';
       hideMsg();
     }
 
     modeBqBtn.addEventListener('click', () => switchMode('bq'));
     modeAiBtn.addEventListener('click', () => switchMode('ai'));
+    modeXmlDocxBtn.addEventListener('click', () => switchMode('xmlDocx'));
 
     // ── Painel de config ──────────────────────────────────────────────────────
     aiSettingsToggle.addEventListener('click', () => {
@@ -768,22 +808,40 @@
       const AI_EXTS = ['.docx', '.pdf', '.txt', '.csv', '.xlsx', '.xls', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
       const files = Array.from(fileList).filter(f => {
         const name = f.name.toLowerCase();
-        return currentMode === 'ai'
-          ? AI_EXTS.some(ext => name.endsWith(ext))
-          : name.endsWith('.docx');
+        if (currentMode === 'ai') {
+          return AI_EXTS.some(ext => name.endsWith(ext));
+        } else if (currentMode === 'xmlDocx') {
+          return name.endsWith('.xml');
+        } else {
+          return name.endsWith('.docx');
+        }
       });
       if (files.length === 0) {
-        showMsg(currentMode === 'ai'
-          ? 'Selecione arquivos .docx, .pdf, .txt, .csv, .xlsx, .xls, .jpg, .png ou .webp'
-          : 'Selecione arquivos .docx', 'error');
+        if (currentMode === 'ai') {
+          showMsg('Selecione arquivos .docx, .pdf, .txt, .csv, .xlsx, .xls, .jpg, .png ou .webp', 'error');
+        } else if (currentMode === 'xmlDocx') {
+          showMsg('Selecione arquivos .xml', 'error');
+        } else {
+          showMsg('Selecione arquivos .docx', 'error');
+        }
         return;
       }
       currentFiles = files;
       fileListEl.innerHTML = files.map(f => `<li>📄 ${escapeHtml(f.name)}</li>`).join('');
-      const action = currentMode === 'ai' ? 'Analisar com IA' : 'Converter';
+      
+      let action = 'Converter';
+      let target = 'XML';
+      if (currentMode === 'ai') {
+        action = 'Analisar com IA';
+        target = 'XML';
+      } else if (currentMode === 'xmlDocx') {
+        action = 'Converter';
+        target = 'DOCX';
+      }
+      
       btnConvert.textContent = files.length === 1
-        ? `${action} para XML`
-        : `${action} ${files.length} arquivos para XML`;
+        ? `${action} para ${target}`
+        : `${action} ${files.length} arquivos para ${target}`;
       btnConvert.disabled = false;
       hideMsg();
     }
@@ -992,6 +1050,157 @@
     });
     fileInput.addEventListener('change', () => { if (fileInput.files.length) setFiles(fileInput.files); });
 
+    // Helper para limpar tags HTML no XML
+    function cleanXmlText(htmlString) {
+      if (!htmlString) return "";
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlString;
+      return tempDiv.textContent || tempDiv.innerText || "";
+    }
+
+    async function processXmlFileToDocx(file) {
+      if (typeof window.docx === 'undefined') {
+        throw new Error("A biblioteca DOCX não carregou corretamente. Verifique sua conexão com a internet.");
+      }
+
+      const text = await file.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "text/xml");
+      
+      const questionNodes = xmlDoc.querySelectorAll("question:not([type='category'])");
+      if (questionNodes.length === 0) {
+        throw new Error(`Nenhuma questão encontrada no arquivo "${file.name}".`);
+      }
+
+      const parsedQuestions = [];
+      questionNodes.forEach((node, index) => {
+        const qType = node.getAttribute("type");
+        const qTextNode = node.querySelector("questiontext > text");
+        const rawQText = qTextNode ? qTextNode.textContent : "";
+        const cleanQText = cleanXmlText(rawQText).trim();
+
+        const answers = [];
+        const answerNodes = node.querySelectorAll("answer");
+        answerNodes.forEach(ansNode => {
+          const fraction = parseFloat(ansNode.getAttribute("fraction") || "0");
+          const isCorrect = fraction > 0;
+          const ansTextNode = ansNode.querySelector("text");
+          const rawAnsText = ansTextNode ? ansTextNode.textContent : "";
+          const cleanAnsText = cleanXmlText(rawAnsText).trim();
+          if (cleanAnsText) {
+            answers.push({
+              text: cleanAnsText,
+              isCorrect: isCorrect
+            });
+          }
+        });
+
+        if (cleanQText) {
+          parsedQuestions.push({
+            number: index + 1,
+            type: qType,
+            text: cleanQText,
+            answers: answers
+          });
+        }
+      });
+
+      if (parsedQuestions.length === 0) {
+        throw new Error(`Nenhuma questão válida encontrada no arquivo "${file.name}".`);
+      }
+
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = window.docx;
+      const docChildren = [];
+      const gabaritoInfo = [];
+
+      docChildren.push(new Paragraph({
+        text: "Banco de Questões",
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 }
+      }));
+
+      const optionsLabels = ['a)', 'b)', 'c)', 'd)', 'e)', 'f)', 'g)', 'h)'];
+
+      parsedQuestions.forEach((q, qIndex) => {
+        const questaoNumero = qIndex + 1;
+        docChildren.push(new Paragraph({
+          children: [new TextRun({ text: `Questão ${questaoNumero}`, bold: true, size: 24 })],
+          spacing: { before: 400, after: 120 }
+        }));
+
+        const paragraphs = q.text.split('\n');
+        paragraphs.forEach(pText => {
+          if (pText.trim()) {
+            docChildren.push(new Paragraph({
+              children: [new TextRun({ text: pText.trim(), size: 22 })],
+              spacing: { after: 120 },
+              alignment: AlignmentType.JUSTIFIED
+            }));
+          }
+        });
+
+        q.answers.forEach((ans, aIndex) => {
+          const label = optionsLabels[aIndex] || '-)';
+          const isBold = chkBoldCorrect.checked && ans.isCorrect;
+
+          docChildren.push(new Paragraph({
+            children: [
+              new TextRun({ text: `${label} `, bold: isBold, size: 22 }),
+              new TextRun({ text: ans.text, bold: isBold, size: 22 })
+            ],
+            indent: { left: 720 },
+            spacing: { after: 80 }
+          }));
+
+          if (ans.isCorrect) {
+            gabaritoInfo.push(`Q${questaoNumero}: ${label.replace(')', '').toUpperCase()}`);
+          }
+        });
+      });
+
+      if (chkGabarito.checked && gabaritoInfo.length > 0) {
+        docChildren.push(new Paragraph({
+          text: "Gabarito",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 800, after: 200 }
+        }));
+
+        let gabaritoText = "";
+        for (let i = 0; i < gabaritoInfo.length; i++) {
+          gabaritoText += gabaritoInfo[i].padEnd(10, ' ');
+          if ((i + 1) % 5 === 0) gabaritoText += "\n";
+        }
+
+        const gabLines = gabaritoText.split('\n');
+        gabLines.forEach(line => {
+          if (line.trim()) {
+            docChildren.push(new Paragraph({
+              children: [new TextRun({ text: line, size: 22 })],
+            }));
+          }
+        });
+      }
+
+      const doc = new Document({
+        creator: "Conversor Moodle para DOCX",
+        description: "Avaliação exportada e formatada",
+        sections: [{
+          properties: {},
+          children: docChildren
+        }]
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const originalName = file.name.replace(/\.xml$/i, '');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${originalName}_Formatado.docx`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 200);
+    }
+
     // ── Converter ──────────────────────────────────────────────────────────────
     btnConvert.addEventListener('click', async () => {
       if (!currentFiles.length) return;
@@ -1055,6 +1264,29 @@
         } catch (err) {
           console.error(err);
           showMsg('Erro: ' + (err.message || String(err)), 'error');
+        } finally {
+          hideSpinner();
+          btnConvert.disabled = false;
+        }
+
+      } else if (currentMode === 'xmlDocx') {
+        // ── Modo XML para DOCX ────────────────────────────────────────────────
+        const label = currentFiles.length === 1
+          ? 'Convertendo ' + currentFiles[0].name + ' para DOCX…'
+          : 'Convertendo ' + currentFiles.length + ' arquivos para DOCX…';
+        showSpinner(label);
+        try {
+          for (let i = 0; i < currentFiles.length; i++) {
+            const f = currentFiles[i];
+            if (currentFiles.length > 1) {
+              spinnerLabel.textContent = `Convertendo ${i + 1} / ${currentFiles.length}: ${f.name}…`;
+            }
+            await processXmlFileToDocx(f);
+          }
+          showMsg('Conversão concluída com sucesso!', 'success');
+        } catch (err) {
+          console.error(err);
+          showMsg('Erro ao converter: ' + (err.message || String(err)), 'error');
         } finally {
           hideSpinner();
           btnConvert.disabled = false;
