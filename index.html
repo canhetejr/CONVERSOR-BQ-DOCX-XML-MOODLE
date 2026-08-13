@@ -542,11 +542,83 @@
       display: none;
       align-self: center;
     }
+
+    /* Botão e modal do tutorial */
+    .btn-tutorial {
+      padding: 0.3rem 0.65rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: transparent;
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-tutorial:hover { border-color: var(--accent); background: var(--drop-hover-bg); }
+    .tutorial-body { line-height: 1.55; }
+    .tutorial-body h3 {
+      margin: 1.4rem 0 0.5rem;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .tutorial-body h3:first-child { margin-top: 0; }
+    .tutorial-body p { margin: 0 0 0.6rem; }
+    .tutorial-body ul, .tutorial-body ol { margin: 0 0 0.6rem 1.2rem; padding: 0; }
+    .tutorial-body li { margin-bottom: 0.3rem; }
+    .tutorial-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0 1rem;
+      font-size: 0.85rem;
+    }
+    .tutorial-table th, .tutorial-table td {
+      border: 1px solid var(--muted);
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .tutorial-table th { background: var(--drop-hover-bg); }
+    .tutorial-table code, .tutorial-body code {
+      background: var(--drop-hover-bg);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    .tutorial-code {
+      background: var(--drop-hover-bg);
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+    }
+    .tutorial-note {
+      border-left: 3px solid var(--accent);
+      padding: 0.5rem 0.8rem;
+      background: var(--drop-hover-bg);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      margin: 0 0 1rem;
+    }
+    .tutorial-download {
+      display: inline-block;
+      width: auto;
+      margin: 0.5rem 0 0;
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
   <main>
     <div class="theme-toggle">
+      <button type="button" class="btn-tutorial" id="btnTutorial">❓ Tutorial</button>
       <span id="themeLabel">Escuro</span>
       <label>
         <input type="checkbox" id="themeToggle" aria-label="Alternar tema claro/escuro">
@@ -645,6 +717,71 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="tutorialOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="tutorialTitle">
+      <div class="modal-header">
+        <h2 id="tutorialTitle">Como usar o conversor</h2>
+      </div>
+      <div class="modal-body tutorial-body">
+        <p>A ferramenta tem três modos, escolhidos pelos botões no topo da página:
+          <strong>BQ Clássico</strong>, <strong>✨ Modo IA</strong> e <strong>XML → DOCX</strong>.
+          Tudo roda no navegador — nenhum arquivo é enviado para servidores desta ferramenta.</p>
+
+        <h3>1. BQ Clássico — .docx com marcadores → XML</h3>
+        <p>Envie um <code>.docx</code> estruturado com marcadores de texto. Cada marcador deve
+          ficar sozinho em seu próprio parágrafo:</p>
+        <table class="tutorial-table">
+          <tr><th>Marcador</th><th>Função</th></tr>
+          <tr><td><code>#Questão</code></td><td>Inicia uma nova questão</td></tr>
+          <tr><td><code>#Resposta</code></td><td>Separa o enunciado da resposta correta e, depois, cada alternativa errada</td></tr>
+          <tr><td><code>#Justificativa</code></td><td>Inicia o feedback exibido ao aluno (pode ficar vazio, mas deve estar presente)</td></tr>
+          <tr><td><code>#Final</code></td><td>Fecha a última questão do arquivo</td></tr>
+        </table>
+        <div class="tutorial-code">#Questão
+Qual é a capital do Brasil?
+#Resposta
+Brasília
+#Resposta
+São Paulo
+#Resposta
+Rio de Janeiro
+#Justificativa
+Brasília é a capital federal desde 1960.
+#Final</div>
+        <ul>
+          <li>A <strong>primeira</strong> resposta depois do enunciado é sempre a <strong>correta</strong>; as seguintes são erradas (1 a 4 alternativas erradas — a ferramenta completa até 4 automaticamente).</li>
+          <li>Formatação rica é preservada: negrito, itálico, listas, tabelas, imagens e fórmulas do Word (viram LaTeX, renderizado pelo Moodle via MathJax).</li>
+          <li>Texto antes do primeiro <code>#Questão</code> é ignorado pela conversão — a categoria do Moodle é definida depois, no campo "Categoria Moodle" da tela de revisão.</li>
+          <li>Você pode arrastar vários arquivos <code>.docx</code> de uma vez; as questões de todos são reunidas em um único banco.</li>
+        </ul>
+        <div class="tutorial-note">Um arquivo de exemplo já pronto está disponível abaixo — use-o para testar rapidamente.</div>
+        <a class="btn tutorial-download" href="docs/exemplo-modelo-bq.docx" download>⬇ Baixar arquivo de exemplo (.docx)</a>
+
+        <h3>2. ✨ Modo IA — qualquer arquivo desformatado → XML</h3>
+        <p>Use quando o arquivo não estiver no formato de marcadores acima: PDF, planilha, texto
+          solto ou até uma foto de prova impressa. A ferramenta extrai o conteúdo e envia para um
+          provedor de IA configurável, que identifica e estrutura as questões automaticamente.</p>
+        <ul>
+          <li><strong>Formatos aceitos:</strong> .docx, .pdf, .txt, .csv, .xlsx, .xls e imagens (.jpg, .png, .gif, .webp, .bmp).</li>
+          <li><strong>Provedores:</strong> Claude (Anthropic), OpenAI, OpenRouter e Gemini (Google), configurados em <em>⚙ Configurações de IA</em>.</li>
+          <li>Sua API Key fica salva só no <code>localStorage</code> do seu navegador — nunca é enviada a esta ferramenta, apenas diretamente ao provedor escolhido.</li>
+          <li>Sempre revise o resultado no modal antes de exportar: a IA pode interpretar errado enunciados, respostas ou alternativas.</li>
+        </ul>
+
+        <h3>3. XML → DOCX — converte no sentido inverso</h3>
+        <p>Envie um ou mais arquivos XML do Moodle (banco de questões exportado) para gerar um
+          documento <code>.docx</code> formatado com as questões. Em <em>⚙ Opções do Documento
+          DOCX</em> você pode escolher incluir um gabarito no final e destacar a resposta correta
+          em negrito nas alternativas.</p>
+      </div>
+      <div class="modal-footer">
+        <div class="footer-right">
+          <button type="button" class="btn modal-close" id="btnTutorialClose">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="spinner-overlay" id="spinnerOverlay">
     <div class="spinner"></div>
     <div class="spinner-label" id="spinnerLabel">Convertendo...</div>
@@ -697,6 +834,21 @@
     const categoryInput = document.getElementById('categoryInput');
     const spinnerOverlay= document.getElementById('spinnerOverlay');
     const spinnerLabel  = document.getElementById('spinnerLabel');
+    const btnTutorial      = document.getElementById('btnTutorial');
+    const tutorialOverlay  = document.getElementById('tutorialOverlay');
+    const btnTutorialClose = document.getElementById('btnTutorialClose');
+
+    function openTutorial() {
+      tutorialOverlay.classList.add('open');
+      tutorialOverlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeTutorial() {
+      tutorialOverlay.classList.remove('open');
+      tutorialOverlay.setAttribute('aria-hidden', 'true');
+    }
+    btnTutorial.addEventListener('click', openTutorial);
+    btnTutorialClose.addEventListener('click', closeTutorial);
+    tutorialOverlay.addEventListener('click', e => { if (e.target === tutorialOverlay) closeTutorial(); });
 
     let currentBanco = null;
     let currentBaseFileName = 'banco-questoes';
