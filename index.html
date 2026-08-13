@@ -307,8 +307,15 @@
       color: var(--text-2);
     }
     .ai-settings-toggle:hover { color: var(--accent); }
-    .ai-settings-arrow { color: var(--muted); transition: transform 0.2s ease; }
-    .ai-settings-arrow.open { transform: rotate(180deg); }
+    .ai-settings-arrow {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid transparent;
+    }
+    .ai-settings-toggle:hover .ai-settings-arrow { border-bottom-color: var(--accent); }
     .ai-settings-panel {
       display: none;
       flex-direction: column;
@@ -408,8 +415,6 @@
       background: var(--accent-soft);
     }
     .drop-zone input { display: none; }
-    .drop-icon { color: var(--muted); margin: 0 auto 0.6rem; }
-    .drop-zone:hover .drop-icon, .drop-zone.dragover .drop-icon { color: var(--accent); }
     .drop-zone .label { font-size: 0.875rem; font-weight: 600; color: var(--text); }
     .drop-hint {
       display: block;
@@ -470,19 +475,20 @@
     }
     .file-remove {
       flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      width: 24px;
-      height: 24px;
-      padding: 0;
+      padding: 0.1rem 0.2rem;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
       color: var(--muted);
       background: transparent;
       border: none;
-      border-radius: 3px;
+      border-bottom: 1px solid transparent;
       cursor: pointer;
-      transition: color 0.15s, background 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .file-remove:hover { color: var(--error); background: var(--error-soft); }
+    .file-remove:hover { color: var(--error); border-bottom-color: var(--error); }
 
     /* ── Botões ────────────────────────────────────────────────────────────── */
     .btn {
@@ -593,21 +599,6 @@
       color: var(--muted);
       max-width: 62ch;
     }
-    .modal-x {
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      width: 30px;
-      height: 30px;
-      padding: 0;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
-    }
-    .modal-x:hover { color: var(--error); border-color: var(--error); background: var(--error-soft); }
     .modal-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.85rem; }
     .modal-footer {
       display: flex;
@@ -656,9 +647,7 @@
       padding-left: 1.1rem;
       border-left: 1px solid var(--border-strong);
     }
-    .search-wrap { position: relative; display: flex; align-items: center; }
-    .search-wrap svg { position: absolute; left: 0.6rem; color: var(--muted); pointer-events: none; }
-    input.search-input { padding-left: 1.95rem; min-width: 200px; }
+    input.search-input { min-width: 200px; }
     .category-input { width: 100%; max-width: 310px; }
 
     /* ── Questões ──────────────────────────────────────────────────────────── */
@@ -772,6 +761,9 @@
       width: 24px;
       height: 24px;
       padding: 0;
+      font-family: inherit;
+      font-size: 0.85rem;
+      line-height: 1;
       color: var(--muted);
       background: transparent;
       border: 1px solid var(--border);
@@ -993,7 +985,6 @@
       .footer-right { display: grid; grid-template-columns: 1fr 1fr; }
       .footer-right .btn { width: 100%; }
       .category-input { max-width: none; }
-      .search-wrap { flex: 1; }
       input.search-input { min-width: 0; width: 100%; }
       .actions-left { gap: 0.8rem; }
       .sel-count { padding-left: 0.8rem; }
@@ -1020,12 +1011,7 @@
         <span class="wordmark-unit">Qualidade EAD</span>
       </div>
       <div class="site-header-actions">
-        <button type="button" class="header-btn" id="btnTutorial" aria-haspopup="dialog">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-          Tutorial
-        </button>
+        <button type="button" class="header-btn" id="btnTutorial" aria-haspopup="dialog">Tutorial</button>
         <div class="theme-toggle">
           <span id="themeLabel">Escuro</span>
           <label>
@@ -1052,9 +1038,7 @@
         <div class="settings-card" id="aiSettingsContainer" style="display:none">
           <div class="ai-settings-toggle" id="aiSettingsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="aiSettingsPanel">
             <span>Configurações de IA</span>
-            <span class="ai-settings-arrow" id="aiSettingsArrow">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
+            <span class="ai-settings-arrow" id="aiSettingsArrow">Mostrar</span>
           </div>
           <div class="ai-settings-panel" id="aiSettingsPanel">
             <div class="ai-settings-row">
@@ -1096,9 +1080,6 @@
         <span class="field-label" id="dropFieldLabel">Arquivos</span>
         <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-labelledby="dropFieldLabel">
           <input type="file" id="fileInput" accept=".docx" multiple>
-          <svg class="drop-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
           <div class="label" id="dropLabel">
             Clique para selecionar ou arraste os arquivos
             <span class="drop-hint" id="dropHint">Formato aceito: .docx</span>
@@ -1125,7 +1106,6 @@
           <h2 id="modalTitle">Revise as questões</h2>
           <p class="modal-sub">Confira e ajuste antes de exportar. Só as questões marcadas vão para o XML.</p>
         </div>
-        <button type="button" class="modal-x" id="btnModalX" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-actions-top">
         <div class="actions-left">
@@ -1133,7 +1113,7 @@
           <button type="button" id="btnDeselectAll">Desmarcar todas</button>
           <span class="sel-count" id="selCount"></span>
         </div>
-        <div class="search-wrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões" aria-label="Filtrar questões"></div>
+        <input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões" aria-label="Filtrar questões">
       </div>
       <div class="modal-body" id="modalBody">
         <!-- questões renderizadas aqui -->
@@ -1157,7 +1137,6 @@
           <h2 id="tutorialTitle">Como usar o conversor</h2>
           <p class="modal-sub">Tudo roda no seu navegador — nenhum arquivo é enviado para servidores desta ferramenta.</p>
         </div>
-        <button type="button" class="modal-x" id="btnTutorialX" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body tutorial-body">
 
@@ -1310,7 +1289,6 @@ Brasília é a capital federal desde 1960.
     }
     btnTutorial.addEventListener('click', openTutorial);
     btnTutorialClose.addEventListener('click', closeTutorial);
-    document.getElementById('btnTutorialX').addEventListener('click', closeTutorial);
     tutorialOverlay.addEventListener('click', e => { if (e.target === tutorialOverlay) closeTutorial(); });
 
     // Esc fecha o modal aberto (revisão tem prioridade por estar acima)
@@ -1419,7 +1397,7 @@ Brasília é a capital federal desde 1960.
     // ── Painel de config ──────────────────────────────────────────────────────
     function toggleAiSettings() {
       const open = aiSettingsPanel.classList.toggle('open');
-      aiSettingsArrow.classList.toggle('open', open);
+      aiSettingsArrow.textContent = open ? 'Ocultar' : 'Mostrar';
       aiSettingsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
     aiSettingsToggle.addEventListener('click', toggleAiSettings);
@@ -1499,16 +1477,6 @@ Brasília é a capital federal desde 1960.
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
-    // Ícones de traço reutilizados em elementos gerados por JS.
-    const X_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-      'stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
-      '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-    const CHEVRON_UP = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-      'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<polyline points="18 15 12 9 6 15"/></svg>';
-    const CHEVRON_DOWN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-      'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<polyline points="6 9 12 15 18 9"/></svg>';
 
     /** Redesenha a lista de arquivos selecionados. */
     function renderFileList() {
@@ -1519,7 +1487,7 @@ Brasília é a capital federal desde 1960.
           '<span class="file-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
           '<span class="file-size">' + formatFileSize(f.size) + '</span>' +
           '<button type="button" class="file-remove" data-remove="' + i + '" ' +
-            'aria-label="Remover ' + escapeHtml(f.name) + '" title="Remover">' + X_ICON + '</button>' +
+            'aria-label="Remover ' + escapeHtml(f.name) + '">Remover</button>' +
         '</li>';
       }).join('');
 
@@ -1665,8 +1633,8 @@ Brasília é a capital federal desde 1960.
             '<input type="checkbox" class="modal-question-check" id="q' + i + '" checked>' +
             '<label for="q' + i + '" class="modal-question-num">Questão ' + (i + 1) + issueBadge + '</label>' +
             '<div class="modal-question-header-actions">' +
-              '<button type="button" class="btn-order" data-move="-1" data-idx="' + i + '" title="Mover para cima" aria-label="Mover para cima"' + (isFirst ? ' disabled' : '') + '>' + CHEVRON_UP + '</button>' +
-              '<button type="button" class="btn-order" data-move="1"  data-idx="' + i + '" title="Mover para baixo" aria-label="Mover para baixo"' + (isLast ? ' disabled' : '') + '>' + CHEVRON_DOWN + '</button>' +
+              '<button type="button" class="btn-order" data-move="-1" data-idx="' + i + '" title="Mover para cima" aria-label="Mover para cima"' + (isFirst ? ' disabled' : '') + '>&uarr;</button>' +
+              '<button type="button" class="btn-order" data-move="1"  data-idx="' + i + '" title="Mover para baixo" aria-label="Mover para baixo"' + (isLast ? ' disabled' : '') + '>&darr;</button>' +
               '<button type="button" class="btn-edit" data-edit-index="' + i + '">Editar</button>' +
             '</div>' +
           '</div>' +
@@ -2093,7 +2061,6 @@ Brasília é a capital federal desde 1960.
     btnSelectAll.addEventListener('click', () => setAllChecks(true));
     btnDeselectAll.addEventListener('click', () => setAllChecks(false));
     btnModalClose.addEventListener('click', closeModal);
-    document.getElementById('btnModalX').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     searchInput.addEventListener('input', () => filterQuestions(searchInput.value));
 
