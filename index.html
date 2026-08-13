@@ -6,369 +6,479 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <title>Conversor BQ DOCX → XML (Moodle)</title>
   <style>
-    /* ── Design tokens ─────────────────────────────────────────────────────── */
-    /* Tema escuro – UnicV */
+    /* ═══════════════════════════════════════════════════════════════════════
+       Conversor BQ — identidade institucional UNICIVE / Qualidade EAD
+       Serifa institucional para títulos, sans para interface, verde fechado
+       como cor de sistema. Hairlines em vez de caixas pesadas.
+       ═══════════════════════════════════════════════════════════════════════ */
+
     :root {
-      --bg: #0f1210;
-      --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(65,143,58,0.10), transparent 70%);
-      --surface: #1a1c1a;
-      --surface-2: #22251f;
-      --text: #e8e6e3;
-      --muted: #9a978f;
-      --border: #33352f;
-      --border-strong: #4a4d45;
-      --accent: #4caf47;
-      --accent-hover: #5cc456;
-      --accent-soft: rgba(76, 175, 71, 0.14);
-      --btn-text: #0c1a0b;
-      --success: #6bcf8f;
-      --error: #ef8b8b;
-      --error-soft: rgba(239, 139, 139, 0.14);
-      --warn: #e0a44a;
-      --warn-soft: rgba(224, 164, 74, 0.14);
-      --drop-hover-bg: rgba(76, 175, 71, 0.10);
-      --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-      --radius: 14px;
-      --radius-sm: 9px;
-    }
-    /* Tema claro – UnicV */
-    [data-theme="light"] {
-      --bg: #f4f6f2;
-      --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(33,167,0,0.10), transparent 70%);
+      /* Marca UNICIVE — folha bicolor: verde-oliva #5a6b37 + dourado #c59333 */
+      --brand-olive: #5a6b37;
+      --brand-gold: #c59333;
+
+      /* Superfícies e texto */
+      --bg: #f0f1e9;
       --surface: #ffffff;
-      --surface-2: #f6f8f4;
-      --text: #161a15;
-      --muted: #64695f;
-      --border: #e0e4dc;
-      --border-strong: #c6ccbf;
-      --accent: #2c8f14;
-      --accent-hover: #23760f;
-      --accent-soft: rgba(44, 143, 20, 0.10);
+      --surface-2: #f7f8f1;
+      --surface-3: #ebede2;
+      --text: #1b1e16;
+      --text-2: #3f4437;
+      --muted: #6c7263;
+      --border: #dee0d2;
+      --border-strong: #bec2ad;
+
+      /* Oliva institucional (fechado o bastante para texto sobre branco) */
+      --accent: #4f5f30;
+      --accent-hover: #3f4c26;
+      --accent-soft: rgba(90, 107, 55, 0.09);
+      --accent-line: rgba(90, 107, 55, 0.32);
       --btn-text: #ffffff;
-      --success: #2c8f14;
-      --error: #c0392b;
-      --error-soft: rgba(192, 57, 43, 0.09);
-      --warn: #b3730a;
-      --warn-soft: rgba(179, 115, 10, 0.10);
-      --drop-hover-bg: rgba(44, 143, 20, 0.07);
-      --shadow: 0 10px 40px rgba(20, 30, 15, 0.10);
-      --shadow-sm: 0 2px 8px rgba(20, 30, 15, 0.07);
+
+      /* Dourado — uso pontual: filete da faixa, numeração, destaques */
+      --gold: #a97c22;
+      --gold-bright: #c59333;
+      --gold-soft: rgba(197, 147, 51, 0.14);
+
+      /* Faixa institucional */
+      --band: #39441f;
+      --band-2: #2b3417;
+      --band-text: #f2f3ea;
+      --band-muted: rgba(242, 243, 234, 0.62);
+      --band-border: rgba(242, 243, 234, 0.18);
+
+      /* Estados */
+      --success: #4f5f30;
+      --error: #99321f;
+      --error-soft: rgba(153, 50, 31, 0.07);
+      --warn: #8a5a12;
+      --warn-soft: rgba(138, 90, 18, 0.08);
+
+      --radius: 5px;
+      --radius-sm: 4px;
+      --shadow: 0 1px 2px rgba(25, 28, 24, 0.05), 0 8px 24px rgba(25, 28, 24, 0.06);
+
+      --serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+      --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #14160f;
+      --surface: #1c1f16;
+      --surface-2: #22261b;
+      --surface-3: #2a2e22;
+      --text: #e9eae0;
+      --text-2: #c6c9b9;
+      --muted: #949a86;
+      --border: #2f3327;
+      --border-strong: #464b3a;
+
+      --accent: #9cb072;
+      --accent-hover: #adc084;
+      --accent-soft: rgba(156, 176, 114, 0.13);
+      --accent-line: rgba(156, 176, 114, 0.35);
+      --btn-text: #14180e;
+
+      --gold: #d7a850;
+      --gold-bright: #e0b563;
+      --gold-soft: rgba(215, 168, 80, 0.14);
+
+      --band: #222a13;
+      --band-2: #171d0d;
+      --band-text: #e9ead9;
+      --band-muted: rgba(233, 234, 217, 0.58);
+      --band-border: rgba(233, 234, 217, 0.14);
+
+      --success: #9cb072;
+      --error: #d98b78;
+      --error-soft: rgba(217, 139, 120, 0.10);
+      --warn: #c9964e;
+      --warn-soft: rgba(201, 150, 78, 0.10);
+
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, 'Helvetica Neue', sans-serif;
-      background-color: var(--bg);
-      background-image: var(--bg-accent);
-      background-repeat: no-repeat;
+      font-family: var(--sans);
+      font-size: 15px;
+      background: var(--bg);
       color: var(--text);
       margin: 0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.25rem;
-      line-height: 1.5;
-      transition: background-color 0.25s ease, color 0.25s ease;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.2s ease, color 0.2s ease;
     }
-    :focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    svg { display: block; flex-shrink: 0; }
 
-    main {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      max-width: 560px;
-      width: 100%;
-      box-shadow: var(--shadow);
-      transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    /* ── Faixa institucional ───────────────────────────────────────────────── */
+    .site-header {
+      background: var(--band);
+      /* filete dourado da marca fechando a faixa institucional */
+      border-bottom: 3px solid var(--brand-gold);
+      color: var(--band-text);
     }
-
-    /* ── Topbar: marca + ações ─────────────────────────────────────────────── */
-    .topbar {
+    .site-logo {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .site-header-inner {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
     }
-    .brand {
+    .wordmark {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.7rem;
       margin-right: auto;
       min-width: 0;
     }
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      border-radius: 9px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 1.05rem;
+    .wordmark-name {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       line-height: 1;
+      color: var(--band-text);
     }
-    .brand-name {
-      font-size: 0.82rem;
+    .wordmark-rule {
+      width: 1px;
+      height: 22px;
+      background: var(--band-border);
+      flex-shrink: 0;
+    }
+    .wordmark-unit {
+      font-size: 0.68rem;
       font-weight: 600;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--band-muted);
+      line-height: 1.25;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .topbar-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-
-    .icon-btn {
+    .site-header-actions { display: flex; align-items: center; gap: 1.1rem; flex-shrink: 0; }
+    .header-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.4rem 0.7rem;
+      gap: 0.4rem;
+      padding: 0.35rem 0.7rem;
       font-family: inherit;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--muted);
+      color: var(--band-text);
       background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--band-border);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .icon-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--drop-hover-bg); }
+    .header-btn:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--band-muted); }
+    .header-btn:focus-visible { outline-color: var(--band-text); }
 
-    h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.5rem;
+    .theme-toggle { display: flex; align-items: center; gap: 0.5rem; }
+    .theme-toggle span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--band-muted);
+    }
+    .theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .theme-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      background: var(--band-text);
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    .theme-toggle input:checked + .theme-switch { background: rgba(255, 255, 255, 0.32); }
+    .theme-toggle input:checked + .theme-switch::after { transform: translateX(16px); }
+    .theme-toggle input:focus-visible + .theme-switch { outline: 2px solid var(--band-text); outline-offset: 2px; }
+
+    /* ── Página ────────────────────────────────────────────────────────────── */
+    .page {
+      flex: 1;
+      width: 100%;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2.75rem 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 620px;
+      width: 100%;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .panel { padding: 1.75rem 1.85rem 1.85rem; }
+
+    .page-title {
+      font-family: var(--serif);
+      font-size: 1.72rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 0.4rem;
     }
     p.sub {
       color: var(--muted);
-      font-size: 0.9rem;
-      margin: 0 0 1.35rem;
+      font-size: 0.875rem;
+      margin: 0 0 1.5rem;
+      max-width: 46ch;
     }
 
-    /* ── Seletor de modo ───────────────────────────────────────────────────── */
+    /* ── Abas de modo ──────────────────────────────────────────────────────── */
     .mode-toggle {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.3rem;
-      padding: 0.3rem;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      margin-bottom: 1.1rem;
+      display: flex;
+      gap: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin: 0 0 1.6rem;
     }
     .mode-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.15rem;
-      padding: 0.5rem 0.35rem;
+      position: relative;
+      padding: 0 0 0.7rem;
+      margin-bottom: -1px;
       font-family: inherit;
-      font-size: 0.78rem;
+      font-size: 0.875rem;
       font-weight: 600;
-      line-height: 1.25;
-      text-align: center;
-      border: none;
-      border-radius: 8px;
-      background: transparent;
       color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
       cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .mode-btn .mode-icon { font-size: 1rem; line-height: 1; }
-    .mode-btn.active {
-      background: var(--accent);
-      color: var(--btn-text);
-      box-shadow: var(--shadow-sm);
-    }
-    .mode-btn:hover:not(.active) { background: var(--drop-hover-bg); color: var(--text); }
+    .mode-btn:hover:not(.active) { color: var(--text); }
+    .mode-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* ── Painéis de configuração (IA / DOCX) ───────────────────────────────── */
+    /* ── Blocos de configuração ────────────────────────────────────────────── */
     .settings-card {
-      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-bottom: 1.1rem;
-      overflow: hidden;
+      background: var(--surface-2);
+      margin-bottom: 1.5rem;
     }
     .ai-settings-toggle {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
+      padding: 0.7rem 0.9rem;
       cursor: pointer;
-      padding: 0.7rem 0.85rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text);
       user-select: none;
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-2);
     }
     .ai-settings-toggle:hover { color: var(--accent); }
-    .ai-settings-arrow { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+    .ai-settings-arrow { color: var(--muted); transition: transform 0.2s ease; }
+    .ai-settings-arrow.open { transform: rotate(180deg); }
     .ai-settings-panel {
       display: none;
       flex-direction: column;
-      gap: 0.55rem;
-      padding: 0 0.85rem 0.85rem;
+      gap: 0.6rem;
+      padding: 0 0.9rem 0.9rem;
     }
     .ai-settings-panel.open { display: flex; }
     .ai-settings-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    input[type="text"], input[type="password"], input[type="search"], select, textarea {
+      font-family: inherit;
+      font-size: 0.86rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.65rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
     .ai-settings-row select,
     .ai-settings-row input[type="text"],
-    .ai-settings-row input[type="password"] {
-      flex: 1;
-      min-width: 0;
-      padding: 0.5rem 0.65rem;
-      font-family: inherit;
-      font-size: 0.85rem;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      transition: border-color 0.15s;
-    }
-    .ai-settings-row select:focus,
-    .ai-settings-row input:focus { outline: none; border-color: var(--accent); }
-    .ai-settings-row input::placeholder { color: var(--muted); opacity: 0.75; }
+    .ai-settings-row input[type="password"] { flex: 1; min-width: 0; }
+
     .ai-settings-save {
-      padding: 0.45rem 0.9rem;
+      padding: 0.5rem 0.95rem;
       font-family: inherit;
       font-size: 0.82rem;
       font-weight: 600;
       color: var(--btn-text);
       background: var(--accent);
-      border: none;
-      border-radius: 7px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
       cursor: pointer;
       white-space: nowrap;
       transition: background 0.15s;
     }
     .ai-settings-save:hover { background: var(--accent-hover); }
     .ai-saved-badge {
+      display: none;
+      align-self: center;
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--success);
-      display: none;
-      align-self: center;
     }
     .settings-hint {
-      font-size: 0.76rem;
-      color: var(--muted);
       margin: 0;
-      line-height: 1.45;
+      font-size: 0.775rem;
+      line-height: 1.5;
+      color: var(--muted);
     }
     .check-row {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 0.55rem;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.86rem;
+      color: var(--text-2);
     }
     .check-row input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
+      margin-top: 0.15rem;
       accent-color: var(--accent);
       cursor: pointer;
       flex-shrink: 0;
     }
 
-    /* ── Drop zone ─────────────────────────────────────────────────────────── */
+    /* ── Área de envio ─────────────────────────────────────────────────────── */
+    .field-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
     .drop-zone {
-      position: relative;
-      border: 2px dashed var(--border-strong);
+      border: 1px dashed var(--border-strong);
       border-radius: var(--radius-sm);
-      padding: 1.9rem 1.25rem;
+      background: var(--surface-2);
+      padding: 1.5rem 1.25rem;
       text-align: center;
       cursor: pointer;
-      background: var(--surface-2);
-      transition: border-color 0.2s, background 0.2s, transform 0.1s;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .drop-zone:hover { border-color: var(--accent); background: var(--drop-hover-bg); }
+    .drop-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
     .drop-zone.dragover {
       border-color: var(--accent);
+      border-style: solid;
       background: var(--accent-soft);
-      transform: scale(1.01);
     }
     .drop-zone input { display: none; }
-    .drop-icon {
-      font-size: 1.9rem;
-      line-height: 1;
-      margin-bottom: 0.5rem;
-      opacity: 0.9;
-    }
-    .drop-zone .label {
-      color: var(--text);
-      font-size: 0.92rem;
-      font-weight: 600;
-    }
+    .drop-icon { color: var(--muted); margin: 0 auto 0.6rem; }
+    .drop-zone:hover .drop-icon, .drop-zone.dragover .drop-icon { color: var(--accent); }
+    .drop-zone .label { font-size: 0.875rem; font-weight: 600; color: var(--text); }
     .drop-hint {
       display: block;
-      margin-top: 0.3rem;
-      font-size: 0.78rem;
+      margin-top: 0.25rem;
+      font-size: 0.775rem;
       font-weight: 400;
       color: var(--muted);
     }
 
-    /* Chips de arquivos selecionados */
     .file-list {
       list-style: none;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      max-height: 160px;
-      overflow-y: auto;
       text-align: left;
+      max-height: 168px;
+      overflow-y: auto;
     }
-    .file-list:not(:empty) { margin-top: 1rem; }
+    .file-list:not(:empty) {
+      margin-top: 1.1rem;
+      border-top: 1px solid var(--border);
+    }
     .file-list li {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
-      padding: 0.5rem 0.6rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.83rem;
+      gap: 0.7rem;
+      padding: 0.6rem 0.15rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.84rem;
     }
-    .file-list .file-icon { flex-shrink: 0; font-size: 0.95rem; }
-    .file-list .file-name {
+    .file-list li:last-child { border-bottom: none; }
+    .file-ext {
+      flex-shrink: 0;
+      min-width: 3.1rem;
+      padding: 0.15rem 0.35rem;
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-align: center;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-line);
+      border-radius: 3px;
+    }
+    .file-name {
       flex: 1;
       min-width: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--text);
-      font-weight: 500;
     }
-    .file-list .file-size { flex-shrink: 0; font-size: 0.75rem; color: var(--muted); }
+    .file-size {
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
     .file-remove {
       flex-shrink: 0;
-      width: 22px;
-      height: 22px;
       display: grid;
       place-items: center;
+      width: 24px;
+      height: 24px;
       padding: 0;
-      font-family: inherit;
-      font-size: 1rem;
-      line-height: 1;
       color: var(--muted);
       background: transparent;
       border: none;
-      border-radius: 5px;
+      border-radius: 3px;
       cursor: pointer;
       transition: color 0.15s, background 0.15s;
     }
@@ -376,82 +486,69 @@
 
     /* ── Botões ────────────────────────────────────────────────────────────── */
     .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
       width: 100%;
-      margin-top: 1.1rem;
-      padding: 0.8rem 1rem;
+      margin-top: 1.4rem;
+      padding: 0.72rem 1.1rem;
       font-family: inherit;
-      font-size: 0.98rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: var(--btn-text);
       background: var(--accent);
-      border: none;
+      border: 1px solid var(--accent);
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background 0.2s, opacity 0.2s, transform 0.05s;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .btn:hover:not(:disabled) { background: var(--accent-hover); }
-    .btn:active:not(:disabled) { transform: scale(0.99); }
+    .btn:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
     .btn:disabled {
-      background: var(--surface-2);
+      background: var(--surface-3);
+      border-color: var(--border);
       color: var(--muted);
-      border: 1px solid var(--border);
       cursor: not-allowed;
     }
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .btn-secondary:hover:not(:disabled) { background: var(--surface-2); border-color: var(--muted); }
 
     /* ── Mensagens ─────────────────────────────────────────────────────────── */
     .msg {
       display: flex;
-      align-items: flex-start;
-      gap: 0.55rem;
-      margin-top: 1rem;
+      gap: 0.6rem;
+      margin-top: 1.1rem;
       padding: 0.75rem 0.85rem;
       border-radius: var(--radius-sm);
-      font-size: 0.87rem;
-      line-height: 1.45;
-      border: 1px solid transparent;
+      border-left: 3px solid;
+      font-size: 0.85rem;
+      line-height: 1.5;
     }
-    .msg.success { background: var(--accent-soft); color: var(--success); border-color: var(--accent); }
-    .msg.error { background: var(--error-soft); color: var(--error); border-color: var(--error); }
+    .msg.success { background: var(--accent-soft); border-color: var(--accent); color: var(--text-2); }
+    .msg.error { background: var(--error-soft); border-color: var(--error); color: var(--text-2); }
     .msg.hide { display: none; }
 
+    /* ── Rodapé ────────────────────────────────────────────────────────────── */
     footer {
-      margin-top: 1.75rem;
-      font-size: 0.78rem;
+      max-width: 620px;
+      width: 100%;
+      margin: 1.5rem auto 0;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
       color: var(--muted);
-      text-align: center;
     }
+    footer .version { font-variant-numeric: tabular-nums; }
 
-    /* ── Toggle de tema ────────────────────────────────────────────────────── */
-    .theme-toggle { display: flex; align-items: center; gap: 0.45rem; }
-    .theme-toggle span { font-size: 0.8rem; color: var(--muted); }
-    .theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .theme-switch {
-      position: relative;
-      display: inline-block;
-      width: 40px;
-      height: 22px;
-      background: var(--border-strong);
-      border-radius: 22px;
-      cursor: pointer;
-      transition: background 0.25s ease;
-    }
-    .theme-switch::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 18px;
-      height: 18px;
-      background: #fff;
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-      transition: transform 0.25s ease;
-    }
-    .theme-toggle input:checked + .theme-switch { background: var(--accent); }
-    .theme-toggle input:checked + .theme-switch::after { transform: translateX(18px); }
-    .theme-toggle input:focus-visible + .theme-switch { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* ── Modais em tela cheia ──────────────────────────────────────────────── */
+    /* ── Modais ────────────────────────────────────────────────────────────── */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -475,469 +572,437 @@
       border-right: 1px solid var(--border);
     }
     .modal-header {
-      padding: 1.1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 1.5rem;
+      padding: 1.35rem 1.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
     .modal-header h2 {
-      margin: 0;
-      font-size: 1.15rem;
+      font-family: var(--serif);
+      font-size: 1.32rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
+      line-height: 1.25;
+      margin: 0;
     }
-    .modal-header .modal-sub {
-      margin: 0.2rem 0 0;
-      font-size: 0.82rem;
+    .modal-sub {
+      margin: 0.3rem 0 0;
+      font-size: 0.83rem;
       color: var(--muted);
+      max-width: 62ch;
     }
     .modal-x {
       flex-shrink: 0;
-      width: 34px;
-      height: 34px;
       display: grid;
       place-items: center;
+      width: 30px;
+      height: 30px;
       padding: 0;
-      font-family: inherit;
-      font-size: 1.15rem;
-      line-height: 1;
       color: var(--muted);
       background: transparent;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s, background 0.15s;
     }
     .modal-x:hover { color: var(--error); border-color: var(--error); background: var(--error-soft); }
-    .modal-body {
-      overflow-y: auto;
-      flex: 1;
-      padding: 1.25rem 1.5rem;
-    }
+    .modal-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.85rem; }
     .modal-footer {
-      padding: 0.85rem 1.5rem;
-      border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
-      flex-shrink: 0;
+      gap: 1rem;
       flex-wrap: wrap;
-      background: var(--surface);
+      padding: 0.9rem 1.85rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      flex-shrink: 0;
     }
     .modal-footer .btn { width: auto; margin-top: 0; }
     .footer-left { flex: 1; min-width: 0; }
     .footer-right { display: flex; gap: 0.6rem; flex-shrink: 0; }
-    .modal-close {
-      background: transparent;
-      border: 1px solid var(--border-strong);
-      color: var(--text);
-    }
-    .modal-close:hover:not(:disabled) { background: var(--surface-2); border-color: var(--muted); }
 
-    /* Barra de ações do modal de revisão */
     .modal-actions-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.7rem 1.5rem;
-      font-size: 0.85rem;
-      color: var(--muted);
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0.7rem 1.85rem;
       border-bottom: 1px solid var(--border);
       background: var(--surface-2);
       flex-shrink: 0;
-      flex-wrap: wrap;
     }
-    .actions-left { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+    .actions-left { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
     .modal-actions-top button {
-      padding: 0.35rem 0.7rem;
+      padding: 0;
       font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .modal-actions-top button:hover { border-color: var(--accent); color: var(--accent); }
-    .sel-count {
-      font-size: 0.78rem;
+      font-size: 0.815rem;
       font-weight: 600;
       color: var(--accent);
-      padding: 0.25rem 0.6rem;
-      background: var(--accent-soft);
-      border-radius: 20px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.15s;
     }
-    .search-input {
-      padding: 0.4rem 0.7rem;
-      font-family: inherit;
-      font-size: 0.85rem;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      min-width: 180px;
+    .modal-actions-top button:hover { border-bottom-color: var(--accent); }
+    .sel-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      padding-left: 1.1rem;
+      border-left: 1px solid var(--border-strong);
     }
-    .search-input:focus { outline: none; border-color: var(--accent); }
-    .category-input {
-      padding: 0.5rem 0.75rem;
-      font-family: inherit;
-      font-size: 0.85rem;
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      width: 100%;
-      max-width: 300px;
-    }
-    .category-input:focus { outline: none; border-color: var(--accent); }
+    .search-wrap { position: relative; display: flex; align-items: center; }
+    .search-wrap svg { position: absolute; left: 0.6rem; color: var(--muted); pointer-events: none; }
+    input.search-input { padding-left: 1.95rem; min-width: 200px; }
+    .category-input { width: 100%; max-width: 310px; }
 
-    /* ── Cartões de questão (revisão) ──────────────────────────────────────── */
+    /* ── Questões ──────────────────────────────────────────────────────────── */
     .modal-question {
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 1.1rem;
-      margin-bottom: 0.9rem;
-      background: var(--surface-2);
-      transition: border-color 0.15s, opacity 0.15s;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      background: var(--surface);
+      transition: opacity 0.15s, border-color 0.15s;
     }
     .modal-question:hover { border-color: var(--border-strong); }
-    .modal-question.unchecked { opacity: 0.5; }
+    .modal-question.unchecked { opacity: 0.45; }
     .modal-question-header {
       display: flex;
       align-items: center;
-      gap: 0.7rem;
-      margin-bottom: 0.85rem;
+      gap: 0.65rem;
+      padding-bottom: 0.8rem;
+      margin-bottom: 0.9rem;
+      border-bottom: 1px solid var(--border);
     }
     .modal-question-header input[type="checkbox"] {
-      width: 17px;
-      height: 17px;
+      width: 15px;
+      height: 15px;
       accent-color: var(--accent);
       cursor: pointer;
       flex-shrink: 0;
     }
     .modal-question-num {
+      font-size: 0.72rem;
       font-weight: 700;
-      color: var(--text);
-      font-size: 0.9rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
     }
-    .modal-question-text {
-      font-size: 0.95rem;
-      margin: 0 0 0.85rem;
-      line-height: 1.55;
-    }
-    .modal-question-text img { max-width: 100%; height: auto; display: block; margin: 0.5rem 0; border-radius: 6px; }
+    .modal-question-text { font-size: 0.925rem; line-height: 1.6; margin: 0 0 1rem; }
+    .modal-question-text img { max-width: 100%; height: auto; display: block; margin: 0.6rem 0; }
+
     .modal-options { list-style: none; margin: 0; padding: 0; }
     .modal-options li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      padding: 0.5rem 0.65rem;
-      margin-bottom: 0.3rem;
-      border-radius: 7px;
-      font-size: 0.9rem;
-      line-height: 1.45;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1.4rem 1fr auto;
+      align-items: baseline;
+      gap: 0.55rem;
+      padding: 0.42rem 0.6rem 0.42rem 0.5rem;
+      font-size: 0.885rem;
+      line-height: 1.5;
+      border-left: 2px solid transparent;
     }
     .modal-options li.correct {
       background: var(--accent-soft);
-      border-color: var(--accent);
-      font-weight: 500;
+      border-left-color: var(--accent);
     }
     .opt-letter {
-      flex-shrink: 0;
-      width: 20px;
-      height: 20px;
-      display: grid;
-      place-items: center;
-      border-radius: 5px;
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      background: var(--surface-2);
       color: var(--muted);
-      border: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
     }
-    .modal-options li.correct .opt-letter {
-      background: var(--accent);
-      color: var(--btn-text);
-      border-color: var(--accent);
-    }
-    .opt-text { flex: 1; min-width: 0; }
+    .modal-options li.correct .opt-letter { color: var(--accent); }
+    .opt-text { min-width: 0; }
     .correct-tag {
-      font-size: 0.7rem;
+      font-size: 0.63rem;
       font-weight: 700;
-      color: var(--accent);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      color: var(--accent);
       white-space: nowrap;
     }
     .modal-question-justification {
-      margin-top: 0.85rem;
-      padding: 0.7rem 0.8rem;
-      background: var(--surface);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 7px 7px 0;
-      font-size: 0.86rem;
+      margin-top: 1rem;
+      padding: 0.7rem 0.85rem;
+      background: var(--surface-2);
+      border-left: 2px solid var(--border-strong);
+      font-size: 0.845rem;
+      line-height: 1.55;
+      color: var(--text-2);
+    }
+    .modal-question-justification strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       color: var(--muted);
-      line-height: 1.5;
     }
     .modal-question-header-actions {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       margin-left: auto;
     }
-    .modal-question-header-actions .btn-edit {
-      padding: 0.35rem 0.7rem;
+    .btn-edit {
+      padding: 0.3rem 0.65rem;
       font-family: inherit;
-      font-size: 0.78rem;
+      font-size: 0.775rem;
       font-weight: 600;
+      color: var(--text-2);
       background: transparent;
       border: 1px solid var(--border-strong);
-      color: var(--text);
-      border-radius: 6px;
+      border-radius: 3px;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .modal-question-header-actions .btn-edit:hover {
-      background: var(--drop-hover-bg);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .btn-edit:hover { color: var(--accent); border-color: var(--accent); }
     .btn-order {
-      width: 26px;
-      height: 26px;
       display: grid;
       place-items: center;
+      width: 24px;
+      height: 24px;
       padding: 0;
-      font-family: inherit;
-      font-size: 0.7rem;
+      color: var(--muted);
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--muted);
-      border-radius: 6px;
+      border-radius: 3px;
       cursor: pointer;
-      line-height: 1;
-      transition: border-color 0.15s, color 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .btn-order:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-order:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
     .btn-order:disabled { opacity: 0.3; cursor: not-allowed; }
     .issue-badge {
-      font-size: 0.7rem;
-      font-weight: 600;
+      margin-left: 0.5rem;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--warn);
       background: var(--warn-soft);
-      border-radius: 5px;
-      padding: 0.15rem 0.45rem;
-      margin-left: 0.4rem;
+      border: 1px solid currentColor;
+      border-radius: 3px;
       white-space: nowrap;
     }
 
-    /* Edição inline */
-    .modal-question-edit { padding-top: 0.35rem; }
     .modal-question-edit label {
       display: block;
-      font-size: 0.78rem;
+      margin: 1.1rem 0 0.35rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      color: var(--muted);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin: 0.9rem 0 0.3rem;
+      color: var(--muted);
     }
     .modal-question-edit label:first-of-type { margin-top: 0; }
     .modal-question-edit textarea {
       width: 100%;
       min-height: 62px;
-      padding: 0.55rem 0.65rem;
-      font-size: 0.88rem;
-      font-family: inherit;
-      line-height: 1.5;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 7px;
+      line-height: 1.55;
       resize: vertical;
     }
-    .modal-question-edit textarea:focus { outline: none; border-color: var(--accent); }
-    .modal-question-edit .wrong-item { display: flex; gap: 0.35rem; margin-bottom: 0.35rem; }
+    .modal-question-edit .wrong-item { display: flex; gap: 0.4rem; margin-bottom: 0.4rem; }
     .modal-question-edit .wrong-item textarea { flex: 1; min-height: 42px; }
-    .modal-question-edit .btn-small {
+    .btn-small {
       padding: 0.35rem 0.6rem;
       font-family: inherit;
-      font-size: 0.76rem;
+      font-size: 0.775rem;
       font-weight: 600;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
+      color: var(--text-2);
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 3px;
       cursor: pointer;
       flex-shrink: 0;
-      transition: border-color 0.15s, color 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .modal-question-edit .btn-small:hover { border-color: var(--accent); color: var(--accent); }
-    .modal-question-edit .edit-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
-    .modal-question-edit .edit-actions .btn { width: auto; margin-top: 0; padding: 0.5rem 1rem; font-size: 0.85rem; }
+    .btn-small:hover { color: var(--accent); border-color: var(--accent); }
+    .edit-actions { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+    .edit-actions .btn { width: auto; margin-top: 0; padding: 0.5rem 1.1rem; font-size: 0.85rem; }
 
-    /* Estado vazio da busca */
     .empty-state {
-      padding: 2.5rem 1rem;
+      padding: 3rem 1rem;
       text-align: center;
+      font-size: 0.875rem;
       color: var(--muted);
-      font-size: 0.9rem;
     }
 
-    /* ── Spinner ───────────────────────────────────────────────────────────── */
+    /* ── Carregamento ──────────────────────────────────────────────────────── */
     .spinner-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(2px);
+      background: rgba(10, 14, 10, 0.72);
       z-index: 2000;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1rem;
+      gap: 1.1rem;
       color: #fff;
     }
     .spinner-overlay.active { display: flex; }
     .spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      border-top-color: var(--accent);
+      width: 34px;
+      height: 34px;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-label { font-size: 0.92rem; opacity: 0.95; text-align: center; padding: 0 1.5rem; }
+    .spinner-label {
+      font-size: 0.875rem;
+      text-align: center;
+      padding: 0 1.5rem;
+      max-width: 34ch;
+    }
 
     /* ── Tutorial ──────────────────────────────────────────────────────────── */
-    .tutorial-body { line-height: 1.6; }
-    .tutorial-step {
+    .tutorial-body { max-width: 68ch; }
+    .tutorial-section {
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin: 1.75rem 0 0.75rem;
+      align-items: baseline;
+      gap: 0.8rem;
+      margin: 2.25rem 0 0.9rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--border);
     }
-    .tutorial-step:first-child { margin-top: 0; }
-    .tutorial-step-num {
-      flex-shrink: 0;
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      border-radius: 7px;
-      background: var(--accent);
-      color: var(--btn-text);
-      font-size: 0.82rem;
+    .tutorial-section:first-child { margin-top: 0; }
+    .tutorial-section-num {
+      font-family: var(--serif);
+      font-size: 1.05rem;
       font-weight: 700;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
     }
-    .tutorial-step h3 {
+    .tutorial-section h3 {
+      font-family: var(--serif);
+      font-size: 1.12rem;
+      font-weight: 700;
       margin: 0;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
     }
-    .tutorial-body p { margin: 0 0 0.7rem; font-size: 0.9rem; }
-    .tutorial-body ul, .tutorial-body ol { margin: 0 0 0.8rem; padding-left: 1.15rem; font-size: 0.9rem; }
-    .tutorial-body li { margin-bottom: 0.35rem; }
+    .tutorial-body p { margin: 0 0 0.8rem; font-size: 0.9rem; line-height: 1.65; }
+    .tutorial-body ul { margin: 0 0 1rem; padding-left: 1.1rem; font-size: 0.9rem; line-height: 1.6; }
+    .tutorial-body li { margin-bottom: 0.4rem; }
+    .tutorial-body code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      padding: 0.08rem 0.3rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      white-space: nowrap;
+    }
     .tutorial-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 0.6rem 0 1rem;
-      font-size: 0.85rem;
-    }
-    .tutorial-table th, .tutorial-table td {
-      border: 1px solid var(--border);
-      padding: 0.5rem 0.65rem;
-      text-align: left;
-      vertical-align: top;
+      margin: 0.6rem 0 1.2rem;
+      font-size: 0.86rem;
     }
     .tutorial-table th {
-      background: var(--surface-2);
+      padding: 0.5rem 0.7rem;
+      text-align: left;
+      font-size: 0.67rem;
       font-weight: 700;
-      font-size: 0.8rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
       color: var(--muted);
+      border-bottom: 1px solid var(--border-strong);
     }
-    .tutorial-body code {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      padding: 0.1rem 0.35rem;
-      border-radius: 5px;
-      font-size: 0.85em;
-      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-      white-space: nowrap;
-    }
-    .tutorial-code {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0.85rem 1rem;
-      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-      font-size: 0.8rem;
-      line-height: 1.7;
-      white-space: pre;
-      overflow-x: auto;
-      margin: 0 0 1rem;
-    }
-    .tutorial-code .mk { color: var(--accent); font-weight: 700; }
-    .tutorial-note {
-      display: flex;
-      gap: 0.55rem;
-      border-left: 3px solid var(--accent);
-      padding: 0.7rem 0.85rem;
-      background: var(--accent-soft);
-      border-radius: 0 7px 7px 0;
-      font-size: 0.86rem;
-      margin: 0 0 1rem;
+    .tutorial-table td {
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
       line-height: 1.5;
     }
+    .tutorial-table tr:last-child td { border-bottom: none; }
+    .tutorial-table td:first-child { width: 1%; white-space: nowrap; }
+    .tutorial-code {
+      margin: 0 0 1.2rem;
+      padding: 1rem 1.15rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent-line);
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 0.79rem;
+      line-height: 1.75;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--text-2);
+    }
+    .tutorial-code .mk { color: var(--accent); font-weight: 700; }
+    .tutorial-code .cm { color: var(--muted); font-style: italic; }
+    .tutorial-note {
+      margin: 0 0 1.2rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface-2);
+      border-left: 2px solid var(--accent);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
     .tutorial-note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+    .tutorial-note-label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .tutorial-note.warn .tutorial-note-label { color: var(--warn); }
     .tutorial-download {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      width: auto;
-      margin: 0.25rem 0 0.5rem;
-      padding: 0.65rem 1.1rem;
-      font-size: 0.88rem;
+      margin: 0.2rem 0 0.6rem;
+      padding: 0.6rem 1.05rem;
+      font-size: 0.86rem;
       font-weight: 600;
       color: var(--btn-text);
       background: var(--accent);
+      border: 1px solid var(--accent);
       border-radius: var(--radius-sm);
       text-decoration: none;
-      transition: background 0.2s;
+      transition: background 0.15s;
     }
     .tutorial-download:hover { background: var(--accent-hover); }
 
     /* ── Responsivo ────────────────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      body { padding: 1rem 0.85rem; justify-content: flex-start; }
-      main { padding: 1.25rem; }
-      h1 { font-size: 1.28rem; }
-      .modal-header, .modal-body, .modal-actions-top, .modal-footer { padding-left: 1rem; padding-right: 1rem; }
+    @media (max-width: 680px) {
+      body { font-size: 14.5px; }
+      .site-header-inner { padding: 0.75rem 1.1rem; }
+      .page { padding: 1.75rem 1.1rem 1.5rem; }
+      .panel { padding: 1.35rem 1.25rem 1.5rem; }
+      .page-title { font-size: 1.42rem; }
+      .mode-toggle { gap: 1.15rem; }
+      .mode-btn { font-size: 0.82rem; }
+      .modal-header, .modal-body, .modal-actions-top, .modal-footer { padding-left: 1.1rem; padding-right: 1.1rem; }
       .modal-footer { flex-direction: column; align-items: stretch; }
-      .footer-right { justify-content: stretch; }
-      .footer-right .btn { flex: 1; }
+      .footer-right { display: grid; grid-template-columns: 1fr 1fr; }
+      .footer-right .btn { width: 100%; }
       .category-input { max-width: none; }
-      .search-input { flex: 1; min-width: 0; }
-      .modal-actions-top { gap: 0.5rem; }
-      .mode-btn { font-size: 0.72rem; }
+      .search-wrap { flex: 1; }
+      input.search-input { min-width: 0; width: 100%; }
+      .actions-left { gap: 0.8rem; }
+      .sel-count { padding-left: 0.8rem; }
       .tutorial-code { font-size: 0.72rem; }
+      footer { flex-direction: column; gap: 0.3rem; }
     }
     @media (max-width: 460px) {
-      /* Libera espaço na topbar: a marca continua no rodapé */
-      .brand-name { display: none; }
+      .wordmark-unit { display: none; }
+      .wordmark-rule { display: none; }
       .theme-toggle span { display: none; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -946,15 +1011,20 @@
   </style>
 </head>
 <body>
-  <main>
-    <div class="topbar">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">📘</span>
-        <span class="brand-name">Qualidade EAD · UNICIVE</span>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="wordmark">
+        <img src="assets/logo-unicive.png" alt="" class="site-logo" width="30" height="30">
+        <span class="wordmark-name">UNICIVE</span>
+        <span class="wordmark-rule" aria-hidden="true"></span>
+        <span class="wordmark-unit">Qualidade EAD</span>
       </div>
-      <div class="topbar-actions">
-        <button type="button" class="icon-btn" id="btnTutorial" aria-haspopup="dialog">
-          <span aria-hidden="true">📖</span> Tutorial
+      <div class="site-header-actions">
+        <button type="button" class="header-btn" id="btnTutorial" aria-haspopup="dialog">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          Tutorial
         </button>
         <div class="theme-toggle">
           <span id="themeLabel">Escuro</span>
@@ -965,78 +1035,88 @@
         </div>
       </div>
     </div>
+  </header>
 
-    <h1>Conversor BQ → XML (Moodle)</h1>
-    <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
+  <div class="page">
+    <main>
+      <div class="panel">
+        <h1 class="page-title">Conversor BQ &rarr; XML</h1>
+        <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
 
-    <div class="mode-toggle" role="tablist" aria-label="Modo de conversão">
-      <button type="button" class="mode-btn active" id="modeBqBtn" role="tab" aria-selected="true">
-        <span class="mode-icon" aria-hidden="true">📄</span>BQ Clássico
-      </button>
-      <button type="button" class="mode-btn" id="modeAiBtn" role="tab" aria-selected="false">
-        <span class="mode-icon" aria-hidden="true">✨</span>Modo IA
-      </button>
-      <button type="button" class="mode-btn" id="modeXmlDocxBtn" role="tab" aria-selected="false">
-        <span class="mode-icon" aria-hidden="true">🔄</span>XML → DOCX
-      </button>
-    </div>
-
-    <div class="settings-card" id="aiSettingsContainer" style="display:none">
-      <div class="ai-settings-toggle" id="aiSettingsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="aiSettingsPanel">
-        <span>⚙️ Configurações de IA</span>
-        <span class="ai-settings-arrow" id="aiSettingsArrow" aria-hidden="true">▼</span>
-      </div>
-      <div class="ai-settings-panel" id="aiSettingsPanel">
-        <div class="ai-settings-row">
-          <select id="aiProviderSelect" aria-label="Provedor de IA">
-            <option value="">Provedor…</option>
-            <option value="claude">Claude (Anthropic)</option>
-            <option value="openai">OpenAI</option>
-            <option value="openrouter">OpenRouter</option>
-            <option value="gemini">Gemini (Google)</option>
-          </select>
-          <input type="text" id="aiModelInput" placeholder="Modelo (opcional)" aria-label="Modelo de IA"
-            title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | openai/gpt-4o-mini | gemini-1.5-flash">
+        <div class="mode-toggle" role="tablist" aria-label="Modo de conversão">
+          <button type="button" class="mode-btn active" id="modeBqBtn" role="tab" aria-selected="true">BQ Clássico</button>
+          <button type="button" class="mode-btn" id="modeAiBtn" role="tab" aria-selected="false">Modo IA</button>
+          <button type="button" class="mode-btn" id="modeXmlDocxBtn" role="tab" aria-selected="false">XML &rarr; DOCX</button>
         </div>
-        <div class="ai-settings-row">
-          <input type="password" id="aiKeyInput" placeholder="API Key" aria-label="Chave de API">
-          <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
-          <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
+
+        <div class="settings-card" id="aiSettingsContainer" style="display:none">
+          <div class="ai-settings-toggle" id="aiSettingsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="aiSettingsPanel">
+            <span>Configurações de IA</span>
+            <span class="ai-settings-arrow" id="aiSettingsArrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="ai-settings-panel" id="aiSettingsPanel">
+            <div class="ai-settings-row">
+              <select id="aiProviderSelect" aria-label="Provedor de IA">
+                <option value="">Provedor…</option>
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openai">OpenAI</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="gemini">Gemini (Google)</option>
+              </select>
+              <input type="text" id="aiModelInput" placeholder="Modelo (opcional)" aria-label="Modelo de IA"
+                title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | openai/gpt-4o-mini | gemini-1.5-flash">
+            </div>
+            <div class="ai-settings-row">
+              <input type="password" id="aiKeyInput" placeholder="Chave de API" aria-label="Chave de API">
+              <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
+              <span class="ai-saved-badge" id="aiSavedBadge">Salvo</span>
+            </div>
+            <p class="settings-hint">A chave fica armazenada apenas neste navegador e é transmitida somente ao provedor selecionado.</p>
+          </div>
         </div>
-        <p class="settings-hint">🔒 A chave fica salva apenas neste navegador e é enviada só para o provedor escolhido.</p>
-      </div>
-    </div>
 
-    <div class="settings-card" id="docxSettingsContainer" style="display:none">
-      <div class="ai-settings-toggle" style="cursor:default">
-        <span>⚙️ Opções do documento DOCX</span>
-      </div>
-      <div class="ai-settings-panel open" id="docxSettingsPanel">
-        <label class="check-row">
-          <input type="checkbox" id="chkGabarito" checked>
-          <span>Incluir gabarito no final do documento</span>
-        </label>
-        <label class="check-row">
-          <input type="checkbox" id="chkBoldCorrect">
-          <span>Destacar a resposta correta em <b>negrito</b> nas alternativas</span>
-        </label>
-      </div>
-    </div>
+        <div class="settings-card" id="docxSettingsContainer" style="display:none">
+          <div class="ai-settings-toggle" style="cursor:default">
+            <span>Opções do documento</span>
+          </div>
+          <div class="ai-settings-panel open" id="docxSettingsPanel">
+            <label class="check-row">
+              <input type="checkbox" id="chkGabarito" checked>
+              <span>Incluir gabarito ao final do documento</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="chkBoldCorrect">
+              <span>Destacar a resposta correta em negrito nas alternativas</span>
+            </label>
+          </div>
+        </div>
 
-    <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Selecionar arquivos">
-      <input type="file" id="fileInput" accept=".docx" multiple>
-      <div class="drop-icon" aria-hidden="true">📥</div>
-      <div class="label" id="dropLabel">
-        Clique ou arraste seus arquivos aqui
-        <span class="drop-hint" id="dropHint">Formato aceito: .docx</span>
+        <span class="field-label" id="dropFieldLabel">Arquivos</span>
+        <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-labelledby="dropFieldLabel">
+          <input type="file" id="fileInput" accept=".docx" multiple>
+          <svg class="drop-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div class="label" id="dropLabel">
+            Clique para selecionar ou arraste os arquivos
+            <span class="drop-hint" id="dropHint">Formato aceito: .docx</span>
+          </div>
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+
+        <button type="button" class="btn" id="btnConvert" disabled>Converter para XML</button>
+
+        <div class="msg hide" id="msg" role="status" aria-live="polite"></div>
       </div>
-      <ul class="file-list" id="fileList"></ul>
-    </div>
+    </main>
 
-    <button type="button" class="btn" id="btnConvert" disabled>Converter para XML</button>
-
-    <div class="msg hide" id="msg" role="status" aria-live="polite"></div>
-  </main>
+    <footer>
+      <span>Qualidade EAD &middot; UNICIVE</span>
+      <span class="version">v1.3.0</span>
+    </footer>
+  </div>
 
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1045,7 +1125,7 @@
           <h2 id="modalTitle">Revise as questões</h2>
           <p class="modal-sub">Confira e ajuste antes de exportar. Só as questões marcadas vão para o XML.</p>
         </div>
-        <button type="button" class="modal-x" id="btnModalX" aria-label="Fechar">✕</button>
+        <button type="button" class="modal-x" id="btnModalX" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-actions-top">
         <div class="actions-left">
@@ -1053,7 +1133,7 @@
           <button type="button" id="btnDeselectAll">Desmarcar todas</button>
           <span class="sel-count" id="selCount"></span>
         </div>
-        <input type="search" id="searchInput" class="search-input" placeholder="🔍 Filtrar questões..." aria-label="Filtrar questões">
+        <div class="search-wrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões" aria-label="Filtrar questões"></div>
       </div>
       <div class="modal-body" id="modalBody">
         <!-- questões renderizadas aqui -->
@@ -1063,7 +1143,7 @@
           <input type="text" id="categoryInput" class="category-input" placeholder="Categoria Moodle (opcional)">
         </div>
         <div class="footer-right">
-          <button type="button" class="btn modal-close" id="btnModalClose">Fechar</button>
+          <button type="button" class="btn btn-secondary" id="btnModalClose">Fechar</button>
           <button type="button" class="btn" id="btnExportXml">Exportar XML</button>
         </div>
       </div>
@@ -1077,12 +1157,12 @@
           <h2 id="tutorialTitle">Como usar o conversor</h2>
           <p class="modal-sub">Tudo roda no seu navegador — nenhum arquivo é enviado para servidores desta ferramenta.</p>
         </div>
-        <button type="button" class="modal-x" id="btnTutorialX" aria-label="Fechar">✕</button>
+        <button type="button" class="modal-x" id="btnTutorialX" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body tutorial-body">
 
-        <div class="tutorial-step">
-          <span class="tutorial-step-num">1</span>
+        <div class="tutorial-section">
+          <span class="tutorial-section-num">1</span>
           <h3>BQ Clássico — .docx com marcadores → XML</h3>
         </div>
         <p>Envie um <code>.docx</code> estruturado com marcadores de texto. Cada marcador deve
@@ -1112,40 +1192,40 @@ Brasília é a capital federal desde 1960.
           <li>Você pode arrastar vários <code>.docx</code> de uma vez; as questões de todos são reunidas em um único banco.</li>
         </ul>
         <div class="tutorial-note">
-          <span aria-hidden="true">💡</span>
+          <span class="tutorial-note-label">Dica</span>
           <span>Baixe o arquivo de exemplo abaixo e envie-o na tela inicial para ver a conversão funcionando em poucos segundos.</span>
         </div>
         <a class="tutorial-download" href="docs/exemplo-modelo-bq.docx" download>
-          <span aria-hidden="true">⬇️</span> Baixar arquivo de exemplo (.docx)
+          Baixar arquivo de exemplo (.docx)
         </a>
 
-        <div class="tutorial-step">
-          <span class="tutorial-step-num">2</span>
-          <h3>✨ Modo IA — qualquer arquivo desformatado → XML</h3>
+        <div class="tutorial-section">
+          <span class="tutorial-section-num">2</span>
+          <h3>Modo IA &mdash; qualquer arquivo desformatado</h3>
         </div>
         <p>Use quando o arquivo <em>não</em> estiver no formato de marcadores acima: um PDF, uma
           planilha, um texto solto ou até a foto de uma prova impressa. A ferramenta extrai o
           conteúdo e envia para um provedor de IA, que identifica e estrutura as questões.</p>
         <ul>
           <li><strong>Formatos aceitos:</strong> .docx, .pdf, .txt, .csv, .xlsx, .xls e imagens (.jpg, .png, .gif, .webp, .bmp).</li>
-          <li><strong>Provedores:</strong> Claude (Anthropic), OpenAI, OpenRouter e Gemini (Google) — configurados em <em>⚙️ Configurações de IA</em>.</li>
+          <li><strong>Provedores:</strong> Claude (Anthropic), OpenAI, OpenRouter e Gemini (Google) — configurados em <em>Configurações de IA</em>.</li>
           <li>Sua API Key fica salva apenas no seu navegador e é enviada somente ao provedor escolhido.</li>
         </ul>
         <div class="tutorial-note warn">
-          <span aria-hidden="true">⚠️</span>
+          <span class="tutorial-note-label">Atenção</span>
           <span>A IA pode interpretar errado enunciados, respostas ou alternativas. <strong>Sempre revise</strong> o resultado na tela de revisão antes de exportar.</span>
         </div>
 
-        <div class="tutorial-step">
-          <span class="tutorial-step-num">3</span>
-          <h3>🔄 XML → DOCX — o caminho inverso</h3>
+        <div class="tutorial-section">
+          <span class="tutorial-section-num">3</span>
+          <h3>XML &rarr; DOCX &mdash; o caminho inverso</h3>
         </div>
         <p>Envie um ou mais arquivos XML do Moodle (banco de questões exportado) para gerar um
-          documento <code>.docx</code> formatado. Em <em>⚙️ Opções do documento DOCX</em> você
+          documento <code>.docx</code> formatado. Em <em>Opções do documento</em> você
           escolhe se quer incluir um gabarito no final e destacar a resposta correta em negrito.</p>
 
-        <div class="tutorial-step">
-          <span class="tutorial-step-num">4</span>
+        <div class="tutorial-section">
+          <span class="tutorial-section-num">4</span>
           <h3>Importar no Moodle</h3>
         </div>
         <p>Com o <code>.xml</code> em mãos, no Moodle vá em
@@ -1154,7 +1234,7 @@ Brasília é a capital federal desde 1960.
       </div>
       <div class="modal-footer">
         <div class="footer-right">
-          <button type="button" class="btn modal-close" id="btnTutorialClose">Fechar</button>
+          <button type="button" class="btn btn-secondary" id="btnTutorialClose">Fechar</button>
         </div>
       </div>
     </div>
@@ -1165,7 +1245,6 @@ Brasília é a capital federal desde 1960.
     <div class="spinner-label" id="spinnerLabel">Convertendo...</div>
   </div>
 
-  <footer>Feito com Carinho 💚 Qualidade EAD - UNICIVE &nbsp;·&nbsp; v1.2.3</footer>
 
   <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] } };</script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -1184,17 +1263,18 @@ Brasília é a capital federal desde 1960.
     function getPreferredTheme() {
       const saved = localStorage.getItem(THEME_KEY);
       if (saved === 'light' || saved === 'dark') return saved;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-      return 'dark';
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+      return 'light';
     }
     function applyTheme(theme) {
-      root[theme === 'light' ? 'setAttribute' : 'removeAttribute']('data-theme', 'light');
-      themeToggle.checked = theme === 'light';
-      themeLabel.textContent = theme === 'light' ? 'Claro' : 'Escuro';
+      // O tema institucional (claro) é o padrão; o escuro é aplicado via atributo.
+      root[theme === 'dark' ? 'setAttribute' : 'removeAttribute']('data-theme', 'dark');
+      themeToggle.checked = theme === 'dark';
+      themeLabel.textContent = theme === 'dark' ? 'Escuro' : 'Claro';
       localStorage.setItem(THEME_KEY, theme);
     }
     applyTheme(getPreferredTheme());
-    themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'light' : 'dark'));
+    themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'dark' : 'light'));
 
     const dropZone      = document.getElementById('dropZone');
     const fileInput     = document.getElementById('fileInput');
@@ -1339,7 +1419,7 @@ Brasília é a capital federal desde 1960.
     // ── Painel de config ──────────────────────────────────────────────────────
     function toggleAiSettings() {
       const open = aiSettingsPanel.classList.toggle('open');
-      aiSettingsArrow.textContent = open ? '▲' : '▼';
+      aiSettingsArrow.classList.toggle('open', open);
       aiSettingsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
     aiSettingsToggle.addEventListener('click', toggleAiSettings);
@@ -1419,21 +1499,27 @@ Brasília é a capital federal desde 1960.
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
-    const FILE_ICONS = {
-      docx: '📄', pdf: '📕', txt: '📝', csv: '📊', xlsx: '📊', xls: '📊', xml: '🗂️',
-      jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', bmp: '🖼️'
-    };
+    // Ícones de traço reutilizados em elementos gerados por JS.
+    const X_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+      '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    const CHEVRON_UP = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<polyline points="18 15 12 9 6 15"/></svg>';
+    const CHEVRON_DOWN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<polyline points="6 9 12 15 18 9"/></svg>';
 
-    /** Redesenha a lista de arquivos selecionados como chips removíveis. */
+    /** Redesenha a lista de arquivos selecionados. */
     function renderFileList() {
       fileListEl.innerHTML = currentFiles.map((f, i) => {
         const ext = f.name.split('.').pop().toLowerCase();
         return '<li>' +
-          '<span class="file-icon" aria-hidden="true">' + (FILE_ICONS[ext] || '📎') + '</span>' +
+          '<span class="file-ext">' + escapeHtml(ext) + '</span>' +
           '<span class="file-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
           '<span class="file-size">' + formatFileSize(f.size) + '</span>' +
           '<button type="button" class="file-remove" data-remove="' + i + '" ' +
-            'aria-label="Remover ' + escapeHtml(f.name) + '" title="Remover">✕</button>' +
+            'aria-label="Remover ' + escapeHtml(f.name) + '" title="Remover">' + X_ICON + '</button>' +
         '</li>';
       }).join('');
 
@@ -1553,7 +1639,7 @@ Brasília é a capital federal desde 1960.
           '<li class="correct">' +
             '<span class="opt-letter">' + LETRAS[0] + '</span>' +
             '<span class="opt-text">' + renderRichHtml(correctText) + '</span>' +
-            '<span class="correct-tag">✓ correta</span>' +
+            '<span class="correct-tag">correta</span>' +
           '</li>'
         ];
         (q.wrong_answer_list || []).forEach(a => {
@@ -1567,10 +1653,10 @@ Brasília é a capital federal desde 1960.
         });
         const justificationText = (q.justification != null ? String(q.justification) : '').trim();
         const justificationHtml = justificationText
-          ? '<div class="modal-question-justification"><strong>Justificativa:</strong> ' + renderRichHtml(justificationText) + '</div>'
+          ? '<div class="modal-question-justification"><strong>Justificativa</strong>' + renderRichHtml(justificationText) + '</div>'
           : '';
         const issueBadge = issues.length
-          ? '<span class="issue-badge" title="' + escapeHtml(issues.join(', ')) + '">⚠ ' + escapeHtml(issues[0]) + '</span>'
+          ? '<span class="issue-badge" title="' + escapeHtml(issues.join(', ')) + '">' + escapeHtml(issues[0]) + '</span>'
           : '';
         const isFirst = i === 0, isLast = i === list.length - 1;
 
@@ -1579,8 +1665,8 @@ Brasília é a capital federal desde 1960.
             '<input type="checkbox" class="modal-question-check" id="q' + i + '" checked>' +
             '<label for="q' + i + '" class="modal-question-num">Questão ' + (i + 1) + issueBadge + '</label>' +
             '<div class="modal-question-header-actions">' +
-              '<button type="button" class="btn-order" data-move="-1" data-idx="' + i + '" title="Mover para cima"' + (isFirst ? ' disabled' : '') + '>▲</button>' +
-              '<button type="button" class="btn-order" data-move="1"  data-idx="' + i + '" title="Mover para baixo"' + (isLast ? ' disabled' : '') + '>▼</button>' +
+              '<button type="button" class="btn-order" data-move="-1" data-idx="' + i + '" title="Mover para cima" aria-label="Mover para cima"' + (isFirst ? ' disabled' : '') + '>' + CHEVRON_UP + '</button>' +
+              '<button type="button" class="btn-order" data-move="1"  data-idx="' + i + '" title="Mover para baixo" aria-label="Mover para baixo"' + (isLast ? ' disabled' : '') + '>' + CHEVRON_DOWN + '</button>' +
               '<button type="button" class="btn-edit" data-edit-index="' + i + '">Editar</button>' +
             '</div>' +
           '</div>' +
@@ -1892,7 +1978,7 @@ Brasília é a capital federal desde 1960.
         }
         const config = AIExtractor.loadConfig();
         if (!config.apiKey || !config.provider) {
-          showMsg('Configure a chave de API e o provedor em ⚙️ Configurações de IA.', 'error');
+          showMsg('Selecione o provedor e informe a chave de API em Configurações de IA.', 'error');
           if (!aiSettingsPanel.classList.contains('open')) toggleAiSettings();
           aiProviderSelect.focus();
           btnConvert.disabled = false;
