@@ -1,7 +1,11 @@
 # Tutorial: convertendo um .docx em XML para o Moodle
 
 Este tutorial explica como preparar um arquivo `.docx` para o **Conversor BQ → XML (Moodle)**
-(`index.html`) e como usar os dois modos disponíveis na ferramenta: **BQ Clássico** e **✨ Modo IA**.
+(`index.html`) e como usar os modos disponíveis na ferramenta: **BQ Clássico**, **✨ Modo IA** e
+**XML → DOCX**.
+
+> O mesmo conteúdo está disponível dentro do próprio app: clique em **📖 Tutorial**, no topo da
+> página, para abri-lo sem sair da ferramenta.
 
 Um arquivo de exemplo já pronto está em [`docs/exemplo-modelo-bq.docx`](./exemplo-modelo-bq.docx) —
 abra-o para ver o formato na prática, ou use-o diretamente na ferramenta para testar a conversão.
