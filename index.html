@@ -6,38 +6,63 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <title>Conversor BQ DOCX → XML (Moodle)</title>
   <style>
-    /* Tema escuro – UnicV (roxo/cinza escuro, verde institucional) */
+    /* ── Design tokens ─────────────────────────────────────────────────────── */
+    /* Tema escuro – UnicV */
     :root {
-      --bg: #0f0f0f;
-      --surface: #1c1d1c;
+      --bg: #0f1210;
+      --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(65,143,58,0.10), transparent 70%);
+      --surface: #1a1c1a;
+      --surface-2: #22251f;
       --text: #e8e6e3;
-      --muted: #8b8792;
-      --accent: #418f3a;
-      --accent-hover: #2cc034;
-      --btn-text: #fff;
-      --success: #52b788;
-      --error: #e07a7a;
-      --drop-hover-bg: rgba(45, 106, 79, 0.12);
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --muted: #9a978f;
+      --border: #33352f;
+      --border-strong: #4a4d45;
+      --accent: #4caf47;
+      --accent-hover: #5cc456;
+      --accent-soft: rgba(76, 175, 71, 0.14);
+      --btn-text: #0c1a0b;
+      --success: #6bcf8f;
+      --error: #ef8b8b;
+      --error-soft: rgba(239, 139, 139, 0.14);
+      --warn: #e0a44a;
+      --warn-soft: rgba(224, 164, 74, 0.14);
+      --drop-hover-bg: rgba(76, 175, 71, 0.10);
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --radius: 14px;
+      --radius-sm: 9px;
     }
     /* Tema claro – UnicV */
     [data-theme="light"] {
-      --bg: #f5f5f0;
-      --surface: #fff;
-      --text: #1a1a1a;
-      --muted: #5c5c5c;
-      --accent: #21a700;
-      --accent-hover: #30b91e;
-      --btn-text: #ebebeb;
-      --success: #397a0d;
-      --error: #b84545;
-      --drop-hover-bg: rgba(30, 126, 52, 0.08);
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --bg: #f4f6f2;
+      --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(33,167,0,0.10), transparent 70%);
+      --surface: #ffffff;
+      --surface-2: #f6f8f4;
+      --text: #161a15;
+      --muted: #64695f;
+      --border: #e0e4dc;
+      --border-strong: #c6ccbf;
+      --accent: #2c8f14;
+      --accent-hover: #23760f;
+      --accent-soft: rgba(44, 143, 20, 0.10);
+      --btn-text: #ffffff;
+      --success: #2c8f14;
+      --error: #c0392b;
+      --error-soft: rgba(192, 57, 43, 0.09);
+      --warn: #b3730a;
+      --warn-soft: rgba(179, 115, 10, 0.10);
+      --drop-hover-bg: rgba(44, 143, 20, 0.07);
+      --shadow: 0 10px 40px rgba(20, 30, 15, 0.10);
+      --shadow-sm: 0 2px 8px rgba(20, 30, 15, 0.07);
     }
+
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, 'Helvetica Neue', sans-serif;
+      background-color: var(--bg);
+      background-image: var(--bg-accent);
+      background-repeat: no-repeat;
       color: var(--text);
       margin: 0;
       min-height: 100vh;
@@ -45,117 +70,368 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
-      transition: background 0.25s ease, color 0.25s ease;
+      padding: 2rem 1.25rem;
+      line-height: 1.5;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
     main {
       background: var(--surface);
-      border-radius: 12px;
-      padding: 2rem;
-      max-width: 480px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      max-width: 560px;
       width: 100%;
       box-shadow: var(--shadow);
-      transition: background 0.25s ease, box-shadow 0.25s ease;
+      transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
-    h1 {
-      margin: 0 0 0.5rem;
-      font-size: 1.35rem;
+
+    /* ── Topbar: marca + ações ─────────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-right: auto;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+    .brand-name {
+      font-size: 0.82rem;
       font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .icon-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--drop-hover-bg); }
+
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
     p.sub {
       color: var(--muted);
       font-size: 0.9rem;
-      margin: 0 0 1.5rem;
+      margin: 0 0 1.35rem;
     }
-    .drop-zone {
-      border: 2px dashed var(--muted);
-      border-radius: 8px;
-      padding: 1.5rem;
+
+    /* ── Seletor de modo ───────────────────────────────────────────────────── */
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.3rem;
+      padding: 0.3rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      margin-bottom: 1.1rem;
+    }
+    .mode-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.5rem 0.35rem;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.25;
       text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--accent);
-      background: var(--drop-hover-bg);
-    }
-    .drop-zone input { display: none; }
-    .drop-zone .label {
+      border: none;
+      border-radius: 8px;
+      background: transparent;
       color: var(--muted);
-      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
     }
-    .drop-zone .file-name {
-      margin-top: 0.5rem;
-      font-weight: 500;
-      color: var(--accent);
+    .mode-btn .mode-icon { font-size: 1rem; line-height: 1; }
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--btn-text);
+      box-shadow: var(--shadow-sm);
     }
-    .btn {
-      width: 100%;
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
+    .mode-btn:hover:not(.active) { background: var(--drop-hover-bg); color: var(--text); }
+
+    /* ── Painéis de configuração (IA / DOCX) ───────────────────────────────── */
+    .settings-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1.1rem;
+      overflow: hidden;
+    }
+    .ai-settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.7rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      user-select: none;
+    }
+    .ai-settings-toggle:hover { color: var(--accent); }
+    .ai-settings-arrow { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+    .ai-settings-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0.55rem;
+      padding: 0 0.85rem 0.85rem;
+    }
+    .ai-settings-panel.open { display: flex; }
+    .ai-settings-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .ai-settings-row select,
+    .ai-settings-row input[type="text"],
+    .ai-settings-row input[type="password"] {
+      flex: 1;
+      min-width: 0;
+      padding: 0.5rem 0.65rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      transition: border-color 0.15s;
+    }
+    .ai-settings-row select:focus,
+    .ai-settings-row input:focus { outline: none; border-color: var(--accent); }
+    .ai-settings-row input::placeholder { color: var(--muted); opacity: 0.75; }
+    .ai-settings-save {
+      padding: 0.45rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--btn-text);
       background: var(--accent);
       border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .ai-settings-save:hover { background: var(--accent-hover); }
+    .ai-saved-badge {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--success);
+      display: none;
+      align-self: center;
+    }
+    .settings-hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .check-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── Drop zone ─────────────────────────────────────────────────────────── */
+    .drop-zone {
+      position: relative;
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 1.9rem 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface-2);
+      transition: border-color 0.2s, background 0.2s, transform 0.1s;
+    }
+    .drop-zone:hover { border-color: var(--accent); background: var(--drop-hover-bg); }
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: scale(1.01);
+    }
+    .drop-zone input { display: none; }
+    .drop-icon {
+      font-size: 1.9rem;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      opacity: 0.9;
+    }
+    .drop-zone .label {
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+    .drop-hint {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    /* Chips de arquivos selecionados */
+    .file-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-height: 160px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .file-list:not(:empty) { margin-top: 1rem; }
+    .file-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      font-size: 0.83rem;
+    }
+    .file-list .file-icon { flex-shrink: 0; font-size: 0.95rem; }
+    .file-list .file-name {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .file-list .file-size { flex-shrink: 0; font-size: 0.75rem; color: var(--muted); }
+    .file-remove {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .file-remove:hover { color: var(--error); background: var(--error-soft); }
+
+    /* ── Botões ────────────────────────────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      margin-top: 1.1rem;
+      padding: 0.8rem 1rem;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--btn-text);
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: background 0.2s, opacity 0.2s, transform 0.05s;
     }
     .btn:hover:not(:disabled) { background: var(--accent-hover); }
-    .btn:active { transform: scale(0.98); }
+    .btn:active:not(:disabled) { transform: scale(0.99); }
     .btn:disabled {
-      opacity: 0.5;
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
       cursor: not-allowed;
     }
+
+    /* ── Mensagens ─────────────────────────────────────────────────────────── */
     .msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
       margin-top: 1rem;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.87rem;
+      line-height: 1.45;
+      border: 1px solid transparent;
     }
-    .msg.success { background: var(--drop-hover-bg); color: var(--success); }
-    .msg.error { background: rgba(224, 122, 122, 0.15); color: var(--error); }
+    .msg.success { background: var(--accent-soft); color: var(--success); border-color: var(--accent); }
+    .msg.error { background: var(--error-soft); color: var(--error); border-color: var(--error); }
     .msg.hide { display: none; }
-    .download-wrap {
-      margin-top: 1rem;
+
+    footer {
+      margin-top: 1.75rem;
+      font-size: 0.78rem;
+      color: var(--muted);
       text-align: center;
     }
-    .download-wrap a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .download-wrap a:hover { text-decoration: underline; }
-    footer {
-      margin-top: 2rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    .theme-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .theme-toggle span {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .theme-toggle input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+
+    /* ── Toggle de tema ────────────────────────────────────────────────────── */
+    .theme-toggle { display: flex; align-items: center; gap: 0.45rem; }
+    .theme-toggle span { font-size: 0.8rem; color: var(--muted); }
+    .theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
     .theme-switch {
       position: relative;
       display: inline-block;
-      width: 44px;
-      height: 24px;
-      background: var(--muted);
-      border-radius: 24px;
+      width: 40px;
+      height: 22px;
+      background: var(--border-strong);
+      border-radius: 22px;
       cursor: pointer;
       transition: background 0.25s ease;
     }
@@ -164,20 +440,18 @@
       position: absolute;
       top: 2px;
       left: 2px;
-      width: 20px;
-      height: 20px;
-      background: var(--surface);
+      width: 18px;
+      height: 18px;
+      background: #fff;
       border-radius: 50%;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       transition: transform 0.25s ease;
     }
-    .theme-toggle input:checked + .theme-switch {
-      background: var(--accent);
-    }
-    .theme-toggle input:checked + .theme-switch::after {
-      transform: translateX(20px);
-    }
-    /* Tela de revisão em tela cheia */
+    .theme-toggle input:checked + .theme-switch { background: var(--accent); }
+    .theme-toggle input:checked + .theme-switch::after { transform: translateX(18px); }
+    .theme-toggle input:focus-visible + .theme-switch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Modais em tela cheia ──────────────────────────────────────────────── */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -187,168 +461,345 @@
       flex-direction: column;
       align-items: center;
     }
-    .modal-overlay.open {
-      display: flex;
-    }
+    .modal-overlay.open { display: flex; }
     .modal {
       background: var(--surface);
       color: var(--text);
-      border-radius: 0;
       width: 100%;
-      max-width: 880px;
+      max-width: 900px;
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 0 1px rgba(128,128,128,0.15), var(--shadow);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
     }
     .modal-header {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--muted);
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 1rem;
       flex-shrink: 0;
     }
     .modal-header h2 {
       margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
+    .modal-header .modal-sub {
+      margin: 0.2rem 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .modal-x {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-family: inherit;
+      font-size: 1.15rem;
+      line-height: 1;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .modal-x:hover { color: var(--error); border-color: var(--error); background: var(--error-soft); }
     .modal-body {
       overflow-y: auto;
       flex: 1;
       padding: 1.25rem 1.5rem;
     }
-    .modal-question {
-      border: 1px solid var(--muted);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      background: var(--bg);
-    }
-    .modal-question-header {
+    .modal-footer {
+      padding: 0.85rem 1.5rem;
+      border-top: 1px solid var(--border);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: space-between;
       gap: 0.75rem;
-      margin-bottom: 0.75rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      background: var(--surface);
     }
-    .modal-question-header input[type="checkbox"] {
-      margin-top: 0.25rem;
-      accent-color: var(--accent);
+    .modal-footer .btn { width: auto; margin-top: 0; }
+    .footer-left { flex: 1; min-width: 0; }
+    .footer-right { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .modal-close {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+    }
+    .modal-close:hover:not(:disabled) { background: var(--surface-2); border-color: var(--muted); }
+
+    /* Barra de ações do modal de revisão */
+    .modal-actions-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .actions-left { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+    .modal-actions-top button {
+      padding: 0.35rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
       cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
     }
-    .modal-question-num {
+    .modal-actions-top button:hover { border-color: var(--accent); color: var(--accent); }
+    .sel-count {
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--accent);
+      padding: 0.25rem 0.6rem;
+      background: var(--accent-soft);
+      border-radius: 20px;
+    }
+    .search-input {
+      padding: 0.4rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      min-width: 180px;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    .category-input {
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .category-input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── Cartões de questão (revisão) ──────────────────────────────────────── */
+    .modal-question {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1.1rem;
+      margin-bottom: 0.9rem;
+      background: var(--surface-2);
+      transition: border-color 0.15s, opacity 0.15s;
+    }
+    .modal-question:hover { border-color: var(--border-strong); }
+    .modal-question.unchecked { opacity: 0.5; }
+    .modal-question-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.85rem;
+    }
+    .modal-question-header input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .modal-question-num {
+      font-weight: 700;
+      color: var(--text);
       font-size: 0.9rem;
     }
     .modal-question-text {
       font-size: 0.95rem;
-      white-space: normal;
-      margin: 0 0 0.75rem;
-      line-height: 1.4;
+      margin: 0 0 0.85rem;
+      line-height: 1.55;
     }
-    .modal-question-text img { max-width: 100%; height: auto; display: block; margin: 0.25rem 0; }
-    .modal-options {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+    .modal-question-text img { max-width: 100%; height: auto; display: block; margin: 0.5rem 0; border-radius: 6px; }
+    .modal-options { list-style: none; margin: 0; padding: 0; }
     .modal-options li {
-      padding: 0.4rem 0.5rem;
-      margin-bottom: 0.25rem;
-      border-radius: 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.5rem 0.65rem;
+      margin-bottom: 0.3rem;
+      border-radius: 7px;
       font-size: 0.9rem;
-      border-left: 3px solid transparent;
+      line-height: 1.45;
+      background: var(--surface);
+      border: 1px solid var(--border);
     }
     .modal-options li.correct {
-      border-left-color: var(--success);
-      background: var(--drop-hover-bg);
+      background: var(--accent-soft);
+      border-color: var(--accent);
       font-weight: 500;
     }
-    .modal-question-justification {
-      margin-top: 0.75rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid var(--muted);
-      font-size: 0.9rem;
+    .opt-letter {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--surface-2);
       color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .modal-options li.correct .opt-letter {
+      background: var(--accent);
+      color: var(--btn-text);
+      border-color: var(--accent);
+    }
+    .opt-text { flex: 1; min-width: 0; }
+    .correct-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .modal-question-justification {
+      margin-top: 0.85rem;
+      padding: 0.7rem 0.8rem;
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 7px 7px 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.5;
     }
     .modal-question-header-actions {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.35rem;
       margin-left: auto;
     }
     .modal-question-header-actions .btn-edit {
-      padding: 0.35rem 0.6rem;
-      font-size: 0.8rem;
+      padding: 0.35rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
       background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
       border-radius: 6px;
       cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
-    .modal-question-header-actions .btn-edit:hover { background: var(--drop-hover-bg); }
-    .modal-question-edit {
-      padding-top: 0.5rem;
+    .modal-question-header-actions .btn-edit:hover {
+      background: var(--drop-hover-bg);
+      border-color: var(--accent);
+      color: var(--accent);
     }
+    .btn-order {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-family: inherit;
+      font-size: 0.7rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      line-height: 1;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-order:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-order:disabled { opacity: 0.3; cursor: not-allowed; }
+    .issue-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--warn);
+      background: var(--warn-soft);
+      border-radius: 5px;
+      padding: 0.15rem 0.45rem;
+      margin-left: 0.4rem;
+      white-space: nowrap;
+    }
+
+    /* Edição inline */
+    .modal-question-edit { padding-top: 0.35rem; }
     .modal-question-edit label {
       display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 700;
       color: var(--muted);
-      margin: 0.75rem 0 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin: 0.9rem 0 0.3rem;
     }
     .modal-question-edit label:first-of-type { margin-top: 0; }
     .modal-question-edit textarea {
       width: 100%;
-      min-height: 60px;
-      padding: 0.5rem;
-      font-size: 0.9rem;
+      min-height: 62px;
+      padding: 0.55rem 0.65rem;
+      font-size: 0.88rem;
       font-family: inherit;
-      background: var(--bg);
+      line-height: 1.5;
+      background: var(--surface);
       color: var(--text);
-      border: 1px solid var(--muted);
-      border-radius: 6px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
       resize: vertical;
     }
     .modal-question-edit textarea:focus { outline: none; border-color: var(--accent); }
-    .modal-question-edit .wrong-item {
-      display: flex;
-      gap: 0.25rem;
-      margin-bottom: 0.25rem;
-    }
-    .modal-question-edit .wrong-item textarea { flex: 1; min-height: 40px; }
+    .modal-question-edit .wrong-item { display: flex; gap: 0.35rem; margin-bottom: 0.35rem; }
+    .modal-question-edit .wrong-item textarea { flex: 1; min-height: 42px; }
     .modal-question-edit .btn-small {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
+      padding: 0.35rem 0.6rem;
+      font-family: inherit;
+      font-size: 0.76rem;
+      font-weight: 600;
       background: var(--surface);
-      border: 1px solid var(--muted);
+      border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
     }
     .modal-question-edit .btn-small:hover { border-color: var(--accent); color: var(--accent); }
-    .modal-question-edit .edit-actions {
-      margin-top: 1rem;
-      display: flex;
-      gap: 0.5rem;
+    .modal-question-edit .edit-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    .modal-question-edit .edit-actions .btn { width: auto; margin-top: 0; padding: 0.5rem 1rem; font-size: 0.85rem; }
+
+    /* Estado vazio da busca */
+    .empty-state {
+      padding: 2.5rem 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
     }
-    .modal-footer .btn { width: auto; margin-top: 0; }
-    .modal-close {
-      background: transparent;
-      border: 1px solid var(--muted);
-      color: var(--text);
-    }
-    .modal-close:hover { background: var(--muted); opacity: 0.8; }
-    /* Spinner de carregamento */
+
+    /* ── Spinner ───────────────────────────────────────────────────────────── */
     .spinner-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.55);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(2px);
       z-index: 2000;
       flex-direction: column;
       align-items: center;
@@ -358,341 +809,243 @@
     }
     .spinner-overlay.active { display: flex; }
     .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(255,255,255,0.25);
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-label { font-size: 0.95rem; opacity: 0.9; }
-    /* Barra de ações do modal */
-    .modal-actions-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.5rem 1.5rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-      border-bottom: 1px solid var(--muted);
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    .actions-left { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .sel-count {
-      font-size: 0.8rem;
-      color: var(--muted);
-      padding: 0.15rem 0.5rem;
-      background: var(--bg);
-      border-radius: 10px;
-    }
-    .search-input {
-      padding: 0.3rem 0.6rem;
-      font-size: 0.85rem;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-      min-width: 170px;
-    }
-    .search-input:focus { outline: none; border-color: var(--accent); }
-    /* Footer com categoria */
-    .modal-footer {
-      padding: 0.75rem 1.5rem;
-      border-top: 1px solid var(--muted);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    .footer-left { flex: 1; min-width: 0; }
-    .footer-right { display: flex; gap: 0.75rem; flex-shrink: 0; }
-    .category-input {
-      padding: 0.45rem 0.7rem;
-      font-size: 0.85rem;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-      width: 100%;
-      max-width: 280px;
-    }
-    .category-input:focus { outline: none; border-color: var(--accent); }
-    /* Botões de reordenação */
-    .btn-order {
-      padding: 0.2rem 0.45rem;
-      font-size: 0.8rem;
-      background: transparent;
-      border: 1px solid var(--muted);
-      color: var(--muted);
-      border-radius: 4px;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .btn-order:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-    .btn-order:disabled { opacity: 0.25; cursor: not-allowed; }
-    /* Badge de problema na questão */
-    .issue-badge {
-      font-size: 0.72rem;
-      color: #c97a10;
-      background: rgba(201,122,16,0.12);
-      border-radius: 4px;
-      padding: 0.1rem 0.4rem;
-      margin-left: 0.4rem;
-    }
-    /* Lista de arquivos selecionados */
-    .file-list {
-      list-style: none;
-      margin: 0.5rem 0 0;
-      padding: 0;
-      text-align: left;
-      max-height: 80px;
-      overflow-y: auto;
-    }
-    .file-list li {
-      font-size: 0.8rem;
-      color: var(--accent);
-      padding: 0.1rem 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .spinner-label { font-size: 0.92rem; opacity: 0.95; text-align: center; padding: 0 1.5rem; }
 
-    /* Toggle Modo BQ / Modo IA */
-    .mode-toggle {
-      display: flex;
-      border: 1px solid var(--muted);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
-    .mode-btn {
-      flex: 1;
-      padding: 0.45rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .mode-btn.active { background: var(--accent); color: var(--btn-text); }
-    .mode-btn:hover:not(.active) { background: var(--drop-hover-bg); color: var(--text); }
-
-    /* Painel de configurações de IA */
-    .ai-settings-toggle {
+    /* ── Tutorial ──────────────────────────────────────────────────────────── */
+    .tutorial-body { line-height: 1.6; }
+    .tutorial-step {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      padding: 0.5rem 0;
-      font-size: 0.9rem;
-      color: var(--muted);
-      user-select: none;
-      margin-top: 1rem;
-      border-top: 1px solid var(--muted);
+      gap: 0.6rem;
+      margin: 1.75rem 0 0.75rem;
     }
-    .ai-settings-toggle:hover { color: var(--accent); }
-    .ai-settings-panel {
-      display: none;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding: 0.75rem 0 0;
-    }
-    .ai-settings-panel.open { display: flex; }
-    .ai-settings-row {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .ai-settings-row select,
-    .ai-settings-row input[type="text"],
-    .ai-settings-row input[type="password"] {
-      flex: 1;
-      min-width: 0;
-      padding: 0.45rem 0.6rem;
-      font-size: 0.85rem;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-    }
-    .ai-settings-row select:focus,
-    .ai-settings-row input:focus { outline: none; border-color: var(--accent); }
-    .ai-settings-save {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--btn-text);
+    .tutorial-step:first-child { margin-top: 0; }
+    .tutorial-step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
       background: var(--accent);
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      white-space: nowrap;
+      color: var(--btn-text);
+      font-size: 0.82rem;
+      font-weight: 700;
     }
-    .ai-settings-save:hover { background: var(--accent-hover); }
-    .ai-saved-badge {
-      font-size: 0.78rem;
-      color: var(--success);
-      display: none;
-      align-self: center;
-    }
-
-    /* Botão e modal do tutorial */
-    .btn-tutorial {
-      padding: 0.3rem 0.65rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--accent);
-      background: transparent;
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn-tutorial:hover { border-color: var(--accent); background: var(--drop-hover-bg); }
-    .tutorial-body { line-height: 1.55; }
-    .tutorial-body h3 {
-      margin: 1.4rem 0 0.5rem;
+    .tutorial-step h3 {
+      margin: 0;
       font-size: 1rem;
-      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
-    .tutorial-body h3:first-child { margin-top: 0; }
-    .tutorial-body p { margin: 0 0 0.6rem; }
-    .tutorial-body ul, .tutorial-body ol { margin: 0 0 0.6rem 1.2rem; padding: 0; }
-    .tutorial-body li { margin-bottom: 0.3rem; }
+    .tutorial-body p { margin: 0 0 0.7rem; font-size: 0.9rem; }
+    .tutorial-body ul, .tutorial-body ol { margin: 0 0 0.8rem; padding-left: 1.15rem; font-size: 0.9rem; }
+    .tutorial-body li { margin-bottom: 0.35rem; }
     .tutorial-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 0.5rem 0 1rem;
+      margin: 0.6rem 0 1rem;
       font-size: 0.85rem;
     }
     .tutorial-table th, .tutorial-table td {
-      border: 1px solid var(--muted);
-      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.65rem;
       text-align: left;
       vertical-align: top;
     }
-    .tutorial-table th { background: var(--drop-hover-bg); }
-    .tutorial-table code, .tutorial-body code {
-      background: var(--drop-hover-bg);
+    .tutorial-table th {
+      background: var(--surface-2);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    .tutorial-body code {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
       padding: 0.1rem 0.35rem;
-      border-radius: 4px;
+      border-radius: 5px;
       font-size: 0.85em;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      white-space: nowrap;
     }
     .tutorial-code {
-      background: var(--drop-hover-bg);
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
       font-size: 0.8rem;
-      line-height: 1.6;
-      white-space: pre-wrap;
+      line-height: 1.7;
+      white-space: pre;
       overflow-x: auto;
       margin: 0 0 1rem;
     }
+    .tutorial-code .mk { color: var(--accent); font-weight: 700; }
     .tutorial-note {
+      display: flex;
+      gap: 0.55rem;
       border-left: 3px solid var(--accent);
-      padding: 0.5rem 0.8rem;
-      background: var(--drop-hover-bg);
-      border-radius: 0 6px 6px 0;
-      font-size: 0.85rem;
+      padding: 0.7rem 0.85rem;
+      background: var(--accent-soft);
+      border-radius: 0 7px 7px 0;
+      font-size: 0.86rem;
       margin: 0 0 1rem;
+      line-height: 1.5;
     }
+    .tutorial-note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
     .tutorial-download {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       width: auto;
-      margin: 0.5rem 0 0;
-      padding: 0.55rem 1rem;
-      font-size: 0.85rem;
+      margin: 0.25rem 0 0.5rem;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--btn-text);
+      background: var(--accent);
+      border-radius: var(--radius-sm);
       text-decoration: none;
+      transition: background 0.2s;
+    }
+    .tutorial-download:hover { background: var(--accent-hover); }
+
+    /* ── Responsivo ────────────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      body { padding: 1rem 0.85rem; justify-content: flex-start; }
+      main { padding: 1.25rem; }
+      h1 { font-size: 1.28rem; }
+      .modal-header, .modal-body, .modal-actions-top, .modal-footer { padding-left: 1rem; padding-right: 1rem; }
+      .modal-footer { flex-direction: column; align-items: stretch; }
+      .footer-right { justify-content: stretch; }
+      .footer-right .btn { flex: 1; }
+      .category-input { max-width: none; }
+      .search-input { flex: 1; min-width: 0; }
+      .modal-actions-top { gap: 0.5rem; }
+      .mode-btn { font-size: 0.72rem; }
+      .tutorial-code { font-size: 0.72rem; }
+    }
+    @media (max-width: 460px) {
+      /* Libera espaço na topbar: a marca continua no rodapé */
+      .brand-name { display: none; }
+      .theme-toggle span { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
   <main>
-    <div class="theme-toggle">
-      <button type="button" class="btn-tutorial" id="btnTutorial">❓ Tutorial</button>
-      <span id="themeLabel">Escuro</span>
-      <label>
-        <input type="checkbox" id="themeToggle" aria-label="Alternar tema claro/escuro">
-        <span class="theme-switch"></span>
-      </label>
+    <div class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">📘</span>
+        <span class="brand-name">Qualidade EAD · UNICIVE</span>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="icon-btn" id="btnTutorial" aria-haspopup="dialog">
+          <span aria-hidden="true">📖</span> Tutorial
+        </button>
+        <div class="theme-toggle">
+          <span id="themeLabel">Escuro</span>
+          <label>
+            <input type="checkbox" id="themeToggle" aria-label="Alternar tema claro/escuro">
+            <span class="theme-switch"></span>
+          </label>
+        </div>
+      </div>
     </div>
+
     <h1>Conversor BQ → XML (Moodle)</h1>
-
-    <div class="mode-toggle">
-      <button type="button" class="mode-btn active" id="modeBqBtn">BQ Clássico</button>
-      <button type="button" class="mode-btn" id="modeAiBtn">✨ Modo IA</button>
-      <button type="button" class="mode-btn" id="modeXmlDocxBtn">XML → DOCX</button>
-    </div>
-
     <p class="sub" id="modeDescription">Envie um .docx no formato BQ e baixe o XML para importar no Moodle.</p>
 
-    <div id="aiSettingsContainer" style="display:none">
-      <div class="ai-settings-toggle" id="aiSettingsToggle">
-        <span>⚙ Configurações de IA</span>
-        <span id="aiSettingsArrow">▼</span>
+    <div class="mode-toggle" role="tablist" aria-label="Modo de conversão">
+      <button type="button" class="mode-btn active" id="modeBqBtn" role="tab" aria-selected="true">
+        <span class="mode-icon" aria-hidden="true">📄</span>BQ Clássico
+      </button>
+      <button type="button" class="mode-btn" id="modeAiBtn" role="tab" aria-selected="false">
+        <span class="mode-icon" aria-hidden="true">✨</span>Modo IA
+      </button>
+      <button type="button" class="mode-btn" id="modeXmlDocxBtn" role="tab" aria-selected="false">
+        <span class="mode-icon" aria-hidden="true">🔄</span>XML → DOCX
+      </button>
+    </div>
+
+    <div class="settings-card" id="aiSettingsContainer" style="display:none">
+      <div class="ai-settings-toggle" id="aiSettingsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="aiSettingsPanel">
+        <span>⚙️ Configurações de IA</span>
+        <span class="ai-settings-arrow" id="aiSettingsArrow" aria-hidden="true">▼</span>
       </div>
       <div class="ai-settings-panel" id="aiSettingsPanel">
         <div class="ai-settings-row">
-          <select id="aiProviderSelect">
+          <select id="aiProviderSelect" aria-label="Provedor de IA">
             <option value="">Provedor…</option>
             <option value="claude">Claude (Anthropic)</option>
             <option value="openai">OpenAI</option>
             <option value="openrouter">OpenRouter</option>
             <option value="gemini">Gemini (Google)</option>
           </select>
-          <input type="text" id="aiModelInput" placeholder="Modelo (opcional)"
+          <input type="text" id="aiModelInput" placeholder="Modelo (opcional)" aria-label="Modelo de IA"
             title="Ex: claude-haiku-4-5-20251001 | gpt-4o-mini | openai/gpt-4o-mini | gemini-1.5-flash">
         </div>
         <div class="ai-settings-row">
-          <input type="password" id="aiKeyInput" placeholder="API Key">
+          <input type="password" id="aiKeyInput" placeholder="API Key" aria-label="Chave de API">
           <button type="button" class="ai-settings-save" id="aiSaveBtn">Salvar</button>
           <span class="ai-saved-badge" id="aiSavedBadge">✓ Salvo</span>
         </div>
+        <p class="settings-hint">🔒 A chave fica salva apenas neste navegador e é enviada só para o provedor escolhido.</p>
       </div>
     </div>
 
-    <div id="docxSettingsContainer" style="display:none">
-      <div class="ai-settings-toggle" style="cursor: default;">
-        <span>⚙ Opções do Documento DOCX</span>
+    <div class="settings-card" id="docxSettingsContainer" style="display:none">
+      <div class="ai-settings-toggle" style="cursor:default">
+        <span>⚙️ Opções do documento DOCX</span>
       </div>
-      <div class="ai-settings-panel open" id="docxSettingsPanel" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0 0;">
-        <div class="ai-settings-row" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
-          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <input type="checkbox" id="chkGabarito" checked style="width: 16px; height: 16px; accent-color: var(--accent);">
-            <span style="font-size: 0.85rem;">Incluir gabarito no final do documento</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <input type="checkbox" id="chkBoldCorrect" style="width: 16px; height: 16px; accent-color: var(--accent);">
-            <span style="font-size: 0.85rem;">Destacar resposta correta a <b>negrito</b> nas alternativas</span>
-          </label>
-        </div>
+      <div class="ai-settings-panel open" id="docxSettingsPanel">
+        <label class="check-row">
+          <input type="checkbox" id="chkGabarito" checked>
+          <span>Incluir gabarito no final do documento</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="chkBoldCorrect">
+          <span>Destacar a resposta correta em <b>negrito</b> nas alternativas</span>
+        </label>
       </div>
     </div>
 
-    <div class="drop-zone" id="dropZone" title="Clique ou arraste arquivos .docx">
+    <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Selecionar arquivos">
       <input type="file" id="fileInput" accept=".docx" multiple>
-      <div class="label">Clique ou arraste arquivos .docx aqui</div>
+      <div class="drop-icon" aria-hidden="true">📥</div>
+      <div class="label" id="dropLabel">
+        Clique ou arraste seus arquivos aqui
+        <span class="drop-hint" id="dropHint">Formato aceito: .docx</span>
+      </div>
       <ul class="file-list" id="fileList"></ul>
     </div>
 
     <button type="button" class="btn" id="btnConvert" disabled>Converter para XML</button>
 
-    <div class="msg hide" id="msg"></div>
+    <div class="msg hide" id="msg" role="status" aria-live="polite"></div>
   </main>
 
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
-        <h2 id="modalTitle">Revise as questões antes de exportar</h2>
+        <div>
+          <h2 id="modalTitle">Revise as questões</h2>
+          <p class="modal-sub">Confira e ajuste antes de exportar. Só as questões marcadas vão para o XML.</p>
+        </div>
+        <button type="button" class="modal-x" id="btnModalX" aria-label="Fechar">✕</button>
       </div>
       <div class="modal-actions-top">
         <div class="actions-left">
@@ -700,7 +1053,7 @@
           <button type="button" id="btnDeselectAll">Desmarcar todas</button>
           <span class="sel-count" id="selCount"></span>
         </div>
-        <input type="search" id="searchInput" class="search-input" placeholder="Filtrar questões...">
+        <input type="search" id="searchInput" class="search-input" placeholder="🔍 Filtrar questões..." aria-label="Filtrar questões">
       </div>
       <div class="modal-body" id="modalBody">
         <!-- questões renderizadas aqui -->
@@ -718,16 +1071,20 @@
   </div>
 
   <div class="modal-overlay" id="tutorialOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-labelledby="tutorialTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
       <div class="modal-header">
-        <h2 id="tutorialTitle">Como usar o conversor</h2>
+        <div>
+          <h2 id="tutorialTitle">Como usar o conversor</h2>
+          <p class="modal-sub">Tudo roda no seu navegador — nenhum arquivo é enviado para servidores desta ferramenta.</p>
+        </div>
+        <button type="button" class="modal-x" id="btnTutorialX" aria-label="Fechar">✕</button>
       </div>
       <div class="modal-body tutorial-body">
-        <p>A ferramenta tem três modos, escolhidos pelos botões no topo da página:
-          <strong>BQ Clássico</strong>, <strong>✨ Modo IA</strong> e <strong>XML → DOCX</strong>.
-          Tudo roda no navegador — nenhum arquivo é enviado para servidores desta ferramenta.</p>
 
-        <h3>1. BQ Clássico — .docx com marcadores → XML</h3>
+        <div class="tutorial-step">
+          <span class="tutorial-step-num">1</span>
+          <h3>BQ Clássico — .docx com marcadores → XML</h3>
+        </div>
         <p>Envie um <code>.docx</code> estruturado com marcadores de texto. Cada marcador deve
           ficar sozinho em seu próprio parágrafo:</p>
         <table class="tutorial-table">
@@ -737,42 +1094,63 @@
           <tr><td><code>#Justificativa</code></td><td>Inicia o feedback exibido ao aluno (pode ficar vazio, mas deve estar presente)</td></tr>
           <tr><td><code>#Final</code></td><td>Fecha a última questão do arquivo</td></tr>
         </table>
-        <div class="tutorial-code">#Questão
+        <div class="tutorial-code"><span class="mk">#Questão</span>
 Qual é a capital do Brasil?
-#Resposta
-Brasília
-#Resposta
+<span class="mk">#Resposta</span>
+Brasília           <span style="opacity:.6">← a primeira resposta é sempre a correta</span>
+<span class="mk">#Resposta</span>
 São Paulo
-#Resposta
+<span class="mk">#Resposta</span>
 Rio de Janeiro
-#Justificativa
+<span class="mk">#Justificativa</span>
 Brasília é a capital federal desde 1960.
-#Final</div>
+<span class="mk">#Final</span></div>
         <ul>
-          <li>A <strong>primeira</strong> resposta depois do enunciado é sempre a <strong>correta</strong>; as seguintes são erradas (1 a 4 alternativas erradas — a ferramenta completa até 4 automaticamente).</li>
-          <li>Formatação rica é preservada: negrito, itálico, listas, tabelas, imagens e fórmulas do Word (viram LaTeX, renderizado pelo Moodle via MathJax).</li>
-          <li>Texto antes do primeiro <code>#Questão</code> é ignorado pela conversão — a categoria do Moodle é definida depois, no campo "Categoria Moodle" da tela de revisão.</li>
-          <li>Você pode arrastar vários arquivos <code>.docx</code> de uma vez; as questões de todos são reunidas em um único banco.</li>
+          <li>A <strong>primeira</strong> resposta depois do enunciado é sempre a <strong>correta</strong>; as seguintes são as erradas (de 1 a 4 — a ferramenta completa até 4 automaticamente).</li>
+          <li>Formatação rica é preservada: negrito, itálico, listas, tabelas, imagens e fórmulas do Word (viram LaTeX, renderizado no Moodle via MathJax).</li>
+          <li>Texto antes do primeiro <code>#Questão</code> é ignorado — a categoria do Moodle é definida depois, no campo "Categoria Moodle" da tela de revisão.</li>
+          <li>Você pode arrastar vários <code>.docx</code> de uma vez; as questões de todos são reunidas em um único banco.</li>
         </ul>
-        <div class="tutorial-note">Um arquivo de exemplo já pronto está disponível abaixo — use-o para testar rapidamente.</div>
-        <a class="btn tutorial-download" href="docs/exemplo-modelo-bq.docx" download>⬇ Baixar arquivo de exemplo (.docx)</a>
+        <div class="tutorial-note">
+          <span aria-hidden="true">💡</span>
+          <span>Baixe o arquivo de exemplo abaixo e envie-o na tela inicial para ver a conversão funcionando em poucos segundos.</span>
+        </div>
+        <a class="tutorial-download" href="docs/exemplo-modelo-bq.docx" download>
+          <span aria-hidden="true">⬇️</span> Baixar arquivo de exemplo (.docx)
+        </a>
 
-        <h3>2. ✨ Modo IA — qualquer arquivo desformatado → XML</h3>
-        <p>Use quando o arquivo não estiver no formato de marcadores acima: PDF, planilha, texto
-          solto ou até uma foto de prova impressa. A ferramenta extrai o conteúdo e envia para um
-          provedor de IA configurável, que identifica e estrutura as questões automaticamente.</p>
+        <div class="tutorial-step">
+          <span class="tutorial-step-num">2</span>
+          <h3>✨ Modo IA — qualquer arquivo desformatado → XML</h3>
+        </div>
+        <p>Use quando o arquivo <em>não</em> estiver no formato de marcadores acima: um PDF, uma
+          planilha, um texto solto ou até a foto de uma prova impressa. A ferramenta extrai o
+          conteúdo e envia para um provedor de IA, que identifica e estrutura as questões.</p>
         <ul>
           <li><strong>Formatos aceitos:</strong> .docx, .pdf, .txt, .csv, .xlsx, .xls e imagens (.jpg, .png, .gif, .webp, .bmp).</li>
-          <li><strong>Provedores:</strong> Claude (Anthropic), OpenAI, OpenRouter e Gemini (Google), configurados em <em>⚙ Configurações de IA</em>.</li>
-          <li>Sua API Key fica salva só no <code>localStorage</code> do seu navegador — nunca é enviada a esta ferramenta, apenas diretamente ao provedor escolhido.</li>
-          <li>Sempre revise o resultado no modal antes de exportar: a IA pode interpretar errado enunciados, respostas ou alternativas.</li>
+          <li><strong>Provedores:</strong> Claude (Anthropic), OpenAI, OpenRouter e Gemini (Google) — configurados em <em>⚙️ Configurações de IA</em>.</li>
+          <li>Sua API Key fica salva apenas no seu navegador e é enviada somente ao provedor escolhido.</li>
         </ul>
+        <div class="tutorial-note warn">
+          <span aria-hidden="true">⚠️</span>
+          <span>A IA pode interpretar errado enunciados, respostas ou alternativas. <strong>Sempre revise</strong> o resultado na tela de revisão antes de exportar.</span>
+        </div>
 
-        <h3>3. XML → DOCX — converte no sentido inverso</h3>
+        <div class="tutorial-step">
+          <span class="tutorial-step-num">3</span>
+          <h3>🔄 XML → DOCX — o caminho inverso</h3>
+        </div>
         <p>Envie um ou mais arquivos XML do Moodle (banco de questões exportado) para gerar um
-          documento <code>.docx</code> formatado com as questões. Em <em>⚙ Opções do Documento
-          DOCX</em> você pode escolher incluir um gabarito no final e destacar a resposta correta
-          em negrito nas alternativas.</p>
+          documento <code>.docx</code> formatado. Em <em>⚙️ Opções do documento DOCX</em> você
+          escolhe se quer incluir um gabarito no final e destacar a resposta correta em negrito.</p>
+
+        <div class="tutorial-step">
+          <span class="tutorial-step-num">4</span>
+          <h3>Importar no Moodle</h3>
+        </div>
+        <p>Com o <code>.xml</code> em mãos, no Moodle vá em
+          <strong>Banco de questões → Importar</strong>, escolha o formato
+          <strong>Moodle XML</strong>, envie o arquivo e confirme.</p>
       </div>
       <div class="modal-footer">
         <div class="footer-right">
@@ -841,14 +1219,26 @@ Brasília é a capital federal desde 1960.
     function openTutorial() {
       tutorialOverlay.classList.add('open');
       tutorialOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      btnTutorialClose.focus();
     }
     function closeTutorial() {
       tutorialOverlay.classList.remove('open');
       tutorialOverlay.setAttribute('aria-hidden', 'true');
+      if (!modalOverlay.classList.contains('open')) document.body.style.overflow = '';
+      btnTutorial.focus();
     }
     btnTutorial.addEventListener('click', openTutorial);
     btnTutorialClose.addEventListener('click', closeTutorial);
+    document.getElementById('btnTutorialX').addEventListener('click', closeTutorial);
     tutorialOverlay.addEventListener('click', e => { if (e.target === tutorialOverlay) closeTutorial(); });
+
+    // Esc fecha o modal aberto (revisão tem prioridade por estar acima)
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (modalOverlay.classList.contains('open')) closeModal();
+      else if (tutorialOverlay.classList.contains('open')) closeTutorial();
+    });
 
     let currentBanco = null;
     let currentBaseFileName = 'banco-questoes';
@@ -874,6 +1264,7 @@ Brasília é a capital federal desde 1960.
     const docxSettingsContainer = document.getElementById('docxSettingsContainer');
     const chkGabarito         = document.getElementById('chkGabarito');
     const chkBoldCorrect      = document.getElementById('chkBoldCorrect');
+    const dropHint            = document.getElementById('dropHint');
 
     // ── Mensagens ──────────────────────────────────────────────────────────────
     function showMsg(text, type) {
@@ -890,38 +1281,55 @@ Brasília é a capital federal desde 1960.
     }
     function hideSpinner() { spinnerOverlay.classList.remove('active'); }
 
-    // ── Modo BQ / IA ──────────────────────────────────────────────────────────
+    // ── Modo BQ / IA / XML→DOCX ───────────────────────────────────────────────
     const AI_ACCEPT = '.docx,.pdf,.txt,.csv,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.gif,.bmp';
     const BQ_ACCEPT = '.docx';
     const XML_ACCEPT = '.xml';
 
+    // Textos e comportamento de cada modo, centralizados em um lugar só.
+    const MODE_INFO = {
+      bq: {
+        btnEl: () => modeBqBtn,
+        accept: BQ_ACCEPT,
+        desc: 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.',
+        btn: 'Converter para XML',
+        hint: 'Formato aceito: .docx'
+      },
+      ai: {
+        btnEl: () => modeAiBtn,
+        accept: AI_ACCEPT,
+        desc: 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.',
+        btn: 'Analisar com IA para XML',
+        hint: 'Aceita .docx, .pdf, .txt, .csv, .xlsx, .xls e imagens'
+      },
+      xmlDocx: {
+        btnEl: () => modeXmlDocxBtn,
+        accept: XML_ACCEPT,
+        desc: 'Envie um ou mais arquivos Moodle XML para convertê-los em documentos DOCX formatados.',
+        btn: 'Gerar e transferir DOCX',
+        hint: 'Formato aceito: .xml'
+      }
+    };
+
     function switchMode(mode) {
       currentMode = mode;
-      modeBqBtn.classList.toggle('active', mode === 'bq');
-      modeAiBtn.classList.toggle('active', mode === 'ai');
-      modeXmlDocxBtn.classList.toggle('active', mode === 'xmlDocx');
-      
-      aiSettingsContainer.style.display = mode === 'ai' ? '' : 'none';
+      const info = MODE_INFO[mode];
+
+      Object.keys(MODE_INFO).forEach(m => {
+        const el = MODE_INFO[m].btnEl();
+        const ativo = m === mode;
+        el.classList.toggle('active', ativo);
+        el.setAttribute('aria-selected', ativo ? 'true' : 'false');
+      });
+
+      aiSettingsContainer.style.display   = mode === 'ai'      ? '' : 'none';
       docxSettingsContainer.style.display = mode === 'xmlDocx' ? '' : 'none';
-      
-      if (mode === 'ai') {
-        fileInput.accept = AI_ACCEPT;
-        modeDescription.textContent = 'Envie qualquer arquivo desformatado — a IA vai reconhecer e extrair as questões automaticamente.';
-        btnConvert.textContent = 'Analisar com IA para XML';
-      } else if (mode === 'xmlDocx') {
-        fileInput.accept = XML_ACCEPT;
-        modeDescription.textContent = 'Envie um ou mais arquivos Moodle XML para convertê-los em documentos DOCX formatados.';
-        btnConvert.textContent = 'Gerar e Transferir DOCX';
-      } else {
-        fileInput.accept = BQ_ACCEPT;
-        modeDescription.textContent = 'Envie um .docx no formato BQ e baixe o XML para importar no Moodle.';
-        btnConvert.textContent = 'Converter para XML';
-      }
-      
-      currentFiles = [];
-      fileListEl.innerHTML = '';
-      btnConvert.disabled = true;
-      hideMsg();
+
+      fileInput.accept            = info.accept;
+      modeDescription.textContent = info.desc;
+      dropHint.textContent        = info.hint;
+
+      clearFiles();
     }
 
     modeBqBtn.addEventListener('click', () => switchMode('bq'));
@@ -929,9 +1337,14 @@ Brasília é a capital federal desde 1960.
     modeXmlDocxBtn.addEventListener('click', () => switchMode('xmlDocx'));
 
     // ── Painel de config ──────────────────────────────────────────────────────
-    aiSettingsToggle.addEventListener('click', () => {
+    function toggleAiSettings() {
       const open = aiSettingsPanel.classList.toggle('open');
       aiSettingsArrow.textContent = open ? '▲' : '▼';
+      aiSettingsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    aiSettingsToggle.addEventListener('click', toggleAiSettings);
+    aiSettingsToggle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAiSettings(); }
     });
 
     function loadAiConfig() {
@@ -979,8 +1392,8 @@ Brasília é a capital federal desde 1960.
         return;
       }
       currentFiles = files;
-      fileListEl.innerHTML = files.map(f => `<li>📄 ${escapeHtml(f.name)}</li>`).join('');
-      
+      renderFileList();
+
       let action = 'Converter';
       let target = 'XML';
       if (currentMode === 'ai') {
@@ -998,15 +1411,67 @@ Brasília é a capital federal desde 1960.
       hideMsg();
     }
 
+    /** Formata o tamanho do arquivo de forma legível (KB / MB). */
+    function formatFileSize(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    const FILE_ICONS = {
+      docx: '📄', pdf: '📕', txt: '📝', csv: '📊', xlsx: '📊', xls: '📊', xml: '🗂️',
+      jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', bmp: '🖼️'
+    };
+
+    /** Redesenha a lista de arquivos selecionados como chips removíveis. */
+    function renderFileList() {
+      fileListEl.innerHTML = currentFiles.map((f, i) => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        return '<li>' +
+          '<span class="file-icon" aria-hidden="true">' + (FILE_ICONS[ext] || '📎') + '</span>' +
+          '<span class="file-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
+          '<span class="file-size">' + formatFileSize(f.size) + '</span>' +
+          '<button type="button" class="file-remove" data-remove="' + i + '" ' +
+            'aria-label="Remover ' + escapeHtml(f.name) + '" title="Remover">✕</button>' +
+        '</li>';
+      }).join('');
+
+      fileListEl.querySelectorAll('.file-remove').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation(); // não reabre o seletor de arquivos
+          currentFiles.splice(parseInt(btn.dataset.remove, 10), 1);
+          if (currentFiles.length) {
+            setFiles(currentFiles);
+          } else {
+            clearFiles();
+          }
+        });
+      });
+    }
+
+    /** Limpa a seleção de arquivos e volta o botão ao estado inicial. */
+    function clearFiles() {
+      currentFiles = [];
+      fileInput.value = '';
+      fileListEl.innerHTML = '';
+      btnConvert.disabled = true;
+      btnConvert.textContent = MODE_INFO[currentMode].btn;
+      hideMsg();
+    }
+
     // ── Modal ──────────────────────────────────────────────────────────────────
     function openModal() {
       modalOverlay.classList.add('open');
       modalOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
       searchInput.value = '';
+      filterQuestions('');
     }
     function closeModal() {
       modalOverlay.classList.remove('open');
       modalOverlay.setAttribute('aria-hidden', 'true');
+      if (!tutorialOverlay.classList.contains('open')) document.body.style.overflow = '';
       currentBanco = null;
     }
 
@@ -1020,9 +1485,24 @@ Brasília é a capital federal desde 1960.
     // ── Filtro de questões ─────────────────────────────────────────────────────
     function filterQuestions(term) {
       const t = term.toLowerCase().trim();
+      let visiveis = 0;
       modalBody.querySelectorAll('.modal-question').forEach(block => {
-        block.style.display = (!t || block.textContent.toLowerCase().includes(t)) ? '' : 'none';
+        const match = !t || block.textContent.toLowerCase().includes(t);
+        block.style.display = match ? '' : 'none';
+        if (match) visiveis++;
       });
+      let vazio = modalBody.querySelector('.empty-state');
+      if (!visiveis) {
+        if (!vazio) {
+          vazio = document.createElement('div');
+          vazio.className = 'empty-state';
+          modalBody.appendChild(vazio);
+        }
+        vazio.textContent = 'Nenhuma questão corresponde a "' + term.trim() + '".';
+        vazio.style.display = '';
+      } else if (vazio) {
+        vazio.style.display = 'none';
+      }
     }
 
     // ── Reordenação ────────────────────────────────────────────────────────────
@@ -1068,12 +1548,22 @@ Brasília é a capital federal desde 1960.
 
         const questionText  = (q.question != null ? String(q.question) : '').trim();
         const correctText   = (q.correct_answer != null ? String(q.correct_answer) : '').trim();
+        const LETRAS = ['A', 'B', 'C', 'D', 'E'];
         const options = [
-          '<li class="correct">' + renderRichHtml(correctText) + ' <span style="font-size:0.8em;color:var(--success)">(Correta)</span></li>'
+          '<li class="correct">' +
+            '<span class="opt-letter">' + LETRAS[0] + '</span>' +
+            '<span class="opt-text">' + renderRichHtml(correctText) + '</span>' +
+            '<span class="correct-tag">✓ correta</span>' +
+          '</li>'
         ];
         (q.wrong_answer_list || []).forEach(a => {
           const t = (a != null && String(a).trim()) ? renderRichHtml(String(a).trim()) : '';
-          if (t) options.push('<li>' + t + '</li>');
+          if (t) options.push(
+            '<li>' +
+              '<span class="opt-letter">' + (LETRAS[options.length] || '·') + '</span>' +
+              '<span class="opt-text">' + t + '</span>' +
+            '</li>'
+          );
         });
         const justificationText = (q.justification != null ? String(q.justification) : '').trim();
         const justificationHtml = justificationText
@@ -1117,6 +1607,9 @@ Brasília é a capital federal desde 1960.
         });
       });
       modalBody.querySelectorAll('.modal-question-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+          cb.closest('.modal-question').classList.toggle('unchecked', !cb.checked);
+        });
         cb.addEventListener('change', updateCounter);
       });
 
@@ -1178,7 +1671,10 @@ Brasília é a capital federal desde 1960.
 
     // ── Seleção em massa ───────────────────────────────────────────────────────
     function setAllChecks(checked) {
-      modalBody.querySelectorAll('.modal-question-check').forEach(cb => { cb.checked = checked; });
+      modalBody.querySelectorAll('.modal-question-check').forEach(cb => {
+        cb.checked = checked;
+        cb.closest('.modal-question').classList.toggle('unchecked', !checked);
+      });
       updateCounter();
     }
     function getCheckedQuestions() {
@@ -1193,6 +1689,9 @@ Brasília é a capital federal desde 1960.
 
     // ── Eventos de arquivo ─────────────────────────────────────────────────────
     dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', e => {
@@ -1354,8 +1853,33 @@ Brasília é a capital federal desde 1960.
     }
 
     // ── Converter ──────────────────────────────────────────────────────────────
+    /**
+     * Confere se as bibliotecas externas (CDN) necessárias ao modo atual carregaram.
+     * Sem isso, uma rede que bloqueia CDNs produz erros crus como "JSZip is not defined".
+     * @returns {boolean} true se pode prosseguir.
+     */
+    function checkDependencias() {
+      const faltando = [];
+      if (currentMode === 'xmlDocx') {
+        if (!window.docx) faltando.push('docx');
+      } else {
+        if (!window.JSZip) faltando.push('JSZip');
+      }
+      if (faltando.length) {
+        showMsg(
+          'Não foi possível carregar as bibliotecas necessárias (' + faltando.join(', ') + '). ' +
+          'Verifique sua conexão com a internet — algumas redes corporativas ou escolares bloqueiam ' +
+          'os servidores de CDN usados pela ferramenta. Recarregue a página para tentar de novo.',
+          'error'
+        );
+        return false;
+      }
+      return true;
+    }
+
     btnConvert.addEventListener('click', async () => {
       if (!currentFiles.length) return;
+      if (!checkDependencias()) return;
       btnConvert.disabled = true;
       hideMsg();
 
@@ -1368,11 +1892,9 @@ Brasília é a capital federal desde 1960.
         }
         const config = AIExtractor.loadConfig();
         if (!config.apiKey || !config.provider) {
-          showMsg('Configure a chave de API e o provedor em ⚙ Configurações de IA.', 'error');
-          if (!aiSettingsPanel.classList.contains('open')) {
-            aiSettingsPanel.classList.add('open');
-            aiSettingsArrow.textContent = '▲';
-          }
+          showMsg('Configure a chave de API e o provedor em ⚙️ Configurações de IA.', 'error');
+          if (!aiSettingsPanel.classList.contains('open')) toggleAiSettings();
+          aiProviderSelect.focus();
           btnConvert.disabled = false;
           return;
         }
@@ -1485,6 +2007,7 @@ Brasília é a capital federal desde 1960.
     btnSelectAll.addEventListener('click', () => setAllChecks(true));
     btnDeselectAll.addEventListener('click', () => setAllChecks(false));
     btnModalClose.addEventListener('click', closeModal);
+    document.getElementById('btnModalX').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     searchInput.addEventListener('input', () => filterQuestions(searchInput.value));
 
